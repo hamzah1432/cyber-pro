@@ -1,0 +1,10 @@
+Removing network pro_00_default
+Creating network "pro_00_default" with the default driver
+Building web
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Image for service web was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+Creating pro_00_web_1 ... 
+Creating pro_00_web_1 ... done
