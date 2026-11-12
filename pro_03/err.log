@@ -1,0 +1,11 @@
+Removing network pro_03_default
+Network pro_03_default not found.
+Creating network "pro_03_default" with the default driver
+Building template-injection-app
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Image for service template-injection-app was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+Creating pro_03_template-injection-app_1 ... 
+Creating pro_03_template-injection-app_1 ... done
