@@ -1,0 +1,11 @@
+Removing network pro_02_default
+Network pro_02_default not found.
+Creating network "pro_02_default" with the default driver
+Building flask_app
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Image for service flask_app was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+Creating pro_02_flask_app_1 ... 
+Creating pro_02_flask_app_1 ... done
