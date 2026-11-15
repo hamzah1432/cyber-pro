@@ -1,0 +1,11 @@
+Removing network pro_04_default
+Network pro_04_default not found.
+Creating network "pro_04_default" with the default driver
+Building xxe-app
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Image for service xxe-app was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+Creating pro_04_xxe-app_1 ... 
+Creating pro_04_xxe-app_1 ... done
