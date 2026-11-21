@@ -46,7 +46,6 @@ export function timeAgo(ts) {
   return Math.round(h / 24) + " d ago";
 }
 
-/** Segmented control; options are [value, label] pairs. */
 export function Seg({ label, value, options, onChange, dark }) {
   return (
     <div className={"seg" + (dark ? " seg--dark" : "")} role="group" aria-label={label}>
@@ -59,8 +58,6 @@ export function Seg({ label, value, options, onChange, dark }) {
   );
 }
 
-// The sanitizer returns fresh DOM nodes (allow-listed tags, only id/href).
-// Mirror them as React elements so an allowed id really lands in the page.
 function toReact(nodes) {
   return Array.from(nodes, (node, i) => {
     if (node.nodeType === Node.TEXT_NODE) return node.nodeValue;
@@ -71,14 +68,12 @@ function toReact(nodes) {
   });
 }
 
-// Links inside posts are inert in this lab: only the Guidelines button navigates.
 function inertLinks(e) {
   if (!e.target.closest("a")) return;
   e.preventDefault();
   toast("Links inside posts are disabled in this lab. Use the Guidelines button.");
 }
 
-/** A restricted-HTML post body. Sanitized once per mount, like the original card. */
 export function RichBody({ source, keepIds }) {
   const content = useMemo(() => toReact(sanitizeHtml(source, { keepIds }).fragment.childNodes), [source, keepIds]);
   return (

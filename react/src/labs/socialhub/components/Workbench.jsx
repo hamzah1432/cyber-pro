@@ -1,5 +1,3 @@
-// The Security Workbench: mode switch, tabs, and the Mission / Editor /
-// Inspector / Source / Results panels.
 import { useLayoutEffect, useState } from "react";
 import guidelinesSource from "../guidelines.js?raw";
 import { useStore } from "../store.js";
@@ -49,7 +47,6 @@ const PRESET_BUTTONS = [
   ["3", "3 · Control"],
 ];
 
-// The Source tab shows the handler exactly as written in guidelines.js.
 function runningSource(which) {
   const name = which === "fixed" ? "openGuidelinesFixed" : "openGuidelinesVulnerable";
   const start = guidelinesSource.indexOf(`export function ${name}(`);
@@ -85,7 +82,6 @@ function tabKeydown(e) {
 export default function Workbench() {
   const s = useStore();
 
-  // Live DOM: probe after every commit, so the values describe the page as it is now.
   const [p, setP] = useState(probe);
   useLayoutEffect(() => {
     const next = probe();

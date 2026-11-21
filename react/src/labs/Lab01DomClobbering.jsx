@@ -33,7 +33,7 @@ function onKeyDown(e) {
 }
 
 export default function Lab01DomClobbering() {
-  useState(initStore); // a fresh lab on every visit
+  useState(initStore);
   const s = useStore();
 
   useEffect(() => {

@@ -1,6 +1,3 @@
-// actions.js — composer and Workbench actions (from composer.js, workbench.js,
-// main.js). Steps that read the DOM right after a change commit it first with
-// flushSync, because the lab inspects the real document.
 import { flushSync } from "react-dom";
 import {
   state,
@@ -21,7 +18,6 @@ export const PLAIN_MAX = 500;
 const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const IMAGE_MAX = 3 * 1024 * 1024;
 
-// Exact payloads from the lab contract. The buttons only FILL the editor.
 export const PRESETS = Object.freeze({
   1: '<a id="guidelinesLink" href="#untrusted-guidelines">Updated Community Rules</a>',
   2: '<a id="guidelinesLink" href="#alternate-guidelines">Community Rules Notice</a>',
@@ -39,8 +35,6 @@ export function toast(text) {
   state.toast = { text, n: state.toast.n + 1 };
   notify();
 }
-
-/* ---------- navigation ---------- */
 
 export function nav(name) {
   if (name === "community-guidelines") return openGuidelines();
@@ -69,8 +63,6 @@ export function setQuery(query) {
   else notify();
 }
 
-/* ---------- composer ---------- */
-
 export function setEditorText(text) {
   state.editorText = text;
   notify();
@@ -89,7 +81,7 @@ function fail(message, notes = []) {
 }
 
 export function previewRich() {
-  const { report } = sanitizeHtml(state.editorText, { keepIds: false }); // same sanitizer; ids not mounted
+  const { report } = sanitizeHtml(state.editorText, { keepIds: false });
   state.previewSource = state.editorText;
   state.feedback = { lines: summarizeReport(report), kind: "info" };
   notify();
@@ -97,7 +89,7 @@ export function previewRich() {
 
 function takeImage() {
   const url = state.pendingImage ? state.pendingImage.url : null;
-  state.pendingImage = null; // ownership of the object URL moves to the post
+  state.pendingImage = null;
   return url;
 }
 
@@ -130,7 +122,6 @@ export function publishPlain(raw) {
   return finishPublish(post);
 }
 
-/** Publish the shared editor content as a restricted-HTML post. Returns the mounted card or null. */
 export function publishRich() {
   const source = state.editorText;
   if (!source.trim()) return fail("Add some HTML source before publishing.");
@@ -173,7 +164,7 @@ export function attachFile(file) {
   else if (file.size > IMAGE_MAX) state.composerError = "Images are limited to 3 MB.";
   else {
     state.composerError = "";
-    setPendingImage({ url: URL.createObjectURL(file), name: file.name }); // local only; never uploaded anywhere
+    setPendingImage({ url: URL.createObjectURL(file), name: file.name });
   }
   notify();
 }
@@ -182,8 +173,6 @@ export function removeAttachment() {
   setPendingImage(null);
   notify();
 }
-
-/* ---------- Workbench ---------- */
 
 export function openWorkbench({ focus: moveFocus = true } = {}) {
   commit(() => (state.wbOpen = true));
@@ -217,8 +206,8 @@ export function clearEditor() {
 export function setMode(mode) {
   if (mode === state.mode) return;
   state.mode = mode;
-  state.codeView = mode; // the Source tab follows the running mode
-  resetAttackState(); // posts removed, route/filters reset; editor bytes + history kept
+  state.codeView = mode;
+  resetAttackState();
   logEvent("mode", `Mode switched to ${mode}. User posts removed; editor kept.`);
   showLocalView("feed", { focus: false });
   toast(mode === "fixed" ? "Fixed mode. Publish the same payload again." : "Vulnerable mode.");
@@ -231,7 +220,7 @@ export function fullReset() {
 }
 
 export function pressGuidelines(invoker) {
-  document.querySelector("[data-guidelines-btn]").click(); // the real toolbar button, same code path
+  document.querySelector("[data-guidelines-btn]").click();
   invoker?.focus();
 }
 

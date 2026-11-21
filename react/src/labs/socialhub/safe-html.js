@@ -1,26 +1,13 @@
-// safe-html.js — restricted rich-text pipeline.
-//
-// SAFETY BOUNDARY: this module exists so user HTML can never run script.
-// The lab's flaw is NOT here. The flaw is that guidelines.js trusts a named
-// window property. This sanitizer deliberately keeps one narrow thing that makes
-// the lab possible: a validated `id` on <a>, plus an allowlisted local `href`.
-//
-// Pipeline: DOMParser (inert document, nothing executes or loads) -> walk the tree
-// -> build FRESH elements with document.createElement. Source nodes are never
-// inserted into the live document and no innerHTML is used on the live page.
-
 export const LIMITS = Object.freeze({ maxSource: 600, maxDepth: 4, maxNodes: 40 });
 
 export const ALLOWED_TAGS = new Set(['P', 'STRONG', 'EM', 'SPAN', 'A', 'BR']);
 
-// Local, in-document destinations only. Anything else is rejected.
 export const ALLOWED_HREFS = new Set([
   '#community-guidelines',
   '#untrusted-guidelines',
   '#alternate-guidelines'
 ]);
 
-// Dangerous or active elements are removed together with their content.
 const DROP_WITH_CONTENT = new Set([
   'SCRIPT', 'STYLE', 'SVG', 'MATH', 'IFRAME', 'FRAME', 'FRAMESET', 'OBJECT', 'EMBED',
   'APPLET', 'FORM', 'TEMPLATE', 'NOSCRIPT', 'TEXTAREA', 'SELECT', 'INPUT', 'BUTTON',
@@ -30,12 +17,6 @@ const DROP_WITH_CONTENT = new Set([
 const ID_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{0,39}$/;
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
-/**
- * An id is only kept when it cannot overwrite something the app owns.
- * `id in window` is true for built-ins (location, name, top...), for app element ids,
- * and for ids already created by earlier rich posts. We accept the id only when
- * nothing exists yet, or when every current match lives inside rich post content.
- */
 function isIdSafe(id) {
   if (!(id in window)) return true;
   const current = window[id];
@@ -50,11 +31,6 @@ function shorten(value, n = 32) {
   return s.length > n ? s.slice(0, n) + '…' : s;
 }
 
-/**
- * @param {string} source untrusted HTML
- * @param {{keepIds?: boolean}} options keepIds=false strips ids (previews, secondary views)
- * @returns {{fragment: DocumentFragment, report: object}}
- */
 export function sanitizeHtml(source, options = {}) {
   const keepIds = options.keepIds === true;
   const report = {
@@ -85,7 +61,7 @@ export function sanitizeHtml(source, options = {}) {
         to.appendChild(document.createTextNode(node.nodeValue));
         continue;
       }
-      if (node.nodeType !== Node.ELEMENT_NODE) continue; // comments, PIs: dropped silently
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
 
       const tag = node.localName.toUpperCase();
       const isHtml = node.namespaceURI === XHTML_NS;
@@ -128,12 +104,10 @@ export function sanitizeHtml(source, options = {}) {
   return { fragment, report };
 }
 
-/** Plain text of the sanitized result (for search and empty-checks). */
 export function sanitizedText(source) {
   return sanitizeHtml(source, { keepIds: false }).fragment.textContent.replace(/\s+/g, ' ').trim();
 }
 
-/** Human-readable lines describing what the sanitizer changed. */
 export function summarizeReport(report) {
   const lines = [];
   if (report.tooLong) lines.push(`Source longer than ${LIMITS.maxSource} characters`);

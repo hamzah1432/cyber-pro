@@ -2,15 +2,9 @@ import { useEffect, useRef } from "react";
 import { ArrowUpRight, Lock, LoaderCircle } from "lucide-react";
 import { LABS } from "../lib/labsMeta.js";
 
-/* The three labs as X-ray films clipped onto a light-box viewer. Each plate
-   shows an ordinary UI; hovering (or focusing) it switches on the backlight
-   and a scan line exposes the mechanism of the flaw underneath. Reveal and
-   dimming mechanics live in index.css under "Lab plates". */
 export default function LabPlates() {
   const boxRef = useRef(null);
 
-  // Touch screens can't hover, so each plate runs its scan once as it
-  // scrolls into view instead.
   useEffect(() => {
     if (!window.matchMedia("(hover: none)").matches) return;
     const io = new IntersectionObserver(
@@ -63,10 +57,8 @@ export default function LabPlates() {
               className="plate group block pt-1.5 outline-none"
             >
               <div className="plate-film relative flex h-full flex-col rounded-xl">
-                {/* film clip */}
                 <span className="absolute left-1/2 top-0 h-2.5 w-12 -translate-x-1/2 -translate-y-1/2 rounded-[3px] border border-white/20 bg-[#141417]" />
 
-                {/* plate header */}
                 <div className="flex items-center justify-between px-4 pb-2.5 pt-4 font-mono text-[10px] tracking-[0.2em]">
                   <span className="text-white/45">PLATE {lab.num}</span>
                   <span className="flex items-center gap-2">
@@ -78,7 +70,6 @@ export default function LabPlates() {
                   </span>
                 </div>
 
-                {/* specimen: surface UI + x-ray layer + scan line */}
                 <div
                   aria-hidden
                   className="relative mx-3 aspect-[4/3] overflow-hidden rounded-lg border border-white/10 bg-[#0c0c0e]"
@@ -95,7 +86,6 @@ export default function LabPlates() {
                   <div className="plate-scan pointer-events-none absolute inset-0" />
                 </div>
 
-                {/* label */}
                 <div className="flex flex-1 flex-col px-4 pb-4 pt-4">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-display text-lg font-bold leading-tight text-white">
@@ -121,7 +111,6 @@ export default function LabPlates() {
                   </dl>
                 </div>
 
-                {/* launch strip */}
                 <span className="plate-cta flex items-center justify-between rounded-b-xl border-t border-white/10 px-4 py-3 font-mono text-[11px] tracking-[0.18em] text-white/70">
                   LAUNCH LAB
                   <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -142,8 +131,6 @@ function Tick({ className }) {
     </span>
   );
 }
-
-/* ── Specimens: one ordinary surface + its exposed skeleton per lab ──────── */
 
 const line = "h-1.5 rounded-full";
 
@@ -210,7 +197,6 @@ function RedosSurface() {
   );
 }
 
-// steps ≈ 2ⁿ for n = 17…24, normalised to the last bar
 const BARS = [17, 18, 19, 20, 21, 22, 23, 24].map((n) => 100 / 2 ** (24 - n));
 
 function RedosXray() {

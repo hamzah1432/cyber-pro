@@ -1,5 +1,3 @@
-// A post card. Plain text and comments are rendered as text; rich bodies go
-// through the sanitizer. Only the main feed ('main') keeps ids.
 import { useEffect, useRef, useState } from "react";
 import { state, useStore, getUser, ME, toggleLike, toggleSave, addComment, notify } from "../store.js";
 import { openProfile, toast } from "../actions.js";

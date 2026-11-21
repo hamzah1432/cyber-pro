@@ -15,24 +15,21 @@ function Section({ num, title, children }) {
   );
 }
 
-// Reusable 6-section lab page. Every lab passes the same props shape, so
-// teammates can clone an existing lab file and swap in their own content.
 export default function LabLayout({
-  meta,       // entry from lib/labsMeta.js
-  what,       // string | node — max 3 sentences
-  vulnCode,   // { title, lines } for CodeBlock
-  sandbox,    // node — the interactive sandbox (SandboxShell)
-  why,        // string | node — 2–3 sentences
-  incident,   // { title, text }
-  fixCode,    // { title, lines } for CodeBlock
-  sources,    // [{ label, href }]
+  meta,
+  what,
+  vulnCode,
+  sandbox,
+  why,
+  incident,
+  fixCode,
+  sources,
 }) {
   const next = nextLabOf(meta.id);
   const Icon = meta.icon;
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6">
-      {/* Lab header */}
       <header className="flex items-start gap-4">
         <span className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/60">
           <Icon size={20} className="text-emerald-400" />

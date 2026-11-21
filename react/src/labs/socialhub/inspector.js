@@ -1,11 +1,8 @@
-// inspector.js — reads the REAL runtime DOM. Nothing here is simulated:
-// every value comes from querying window / document at the moment it is called.
 import { state, logEvent, notify } from "./store.js";
 import { TRUSTED_VIEW, ALLOWED_VIEWS } from "./views.js";
 
 const TARGET = "guidelinesLink";
 
-/** Snapshot of what `window.guidelinesLink` is right now. */
 export function probe() {
   const found = window[TARGET];
   const candidates = Array.from(document.querySelectorAll(`[id="${TARGET}"]`));
@@ -29,7 +26,6 @@ export function probe() {
   };
 }
 
-/** Classify the outcome of a Guidelines press from what was actually observed. */
 function classify(before, run) {
   if (!before.injectedExists) return { code: "absent", label: "Collision absent: trusted view opened" };
   if (!before.identity) {
@@ -43,7 +39,6 @@ function classify(before, run) {
   return { code: "present-unused", label: "Collision present, but its href selects nothing different" };
 }
 
-/** Called by guidelines.js right after a handler ran. Reads the resulting route. */
 export function recordRun(before) {
   const run = { mode: state.mode, before, destination: "#" + state.route, trusted: TRUSTED_VIEW };
   run.effect = classify(before, run);
@@ -54,7 +49,6 @@ export function recordRun(before) {
   notify();
 }
 
-/** Verdict shown in the comparison panel. */
 export function verdict() {
   const run = state.lastRun;
   if (!run) return { code: "idle", label: "Press Guidelines to observe" };

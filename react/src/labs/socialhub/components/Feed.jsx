@@ -1,8 +1,3 @@
-// The feed view: composer, toolbar and the post list.
-//
-// Important for the lab: the main feed keeps ONE card per post for the whole
-// session and only hides non-matching cards. That keeps a published payload
-// mounted in the document, like a real page would.
 import { useRef, useState } from "react";
 import { state, useStore, getUser, notify, ME } from "../store.js";
 import {

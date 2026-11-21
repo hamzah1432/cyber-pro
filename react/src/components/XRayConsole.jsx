@@ -1,11 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Terminal, Trash2 } from "lucide-react";
 
-// Factory for console entries so every lab logs the same shape.
 export const logEntry = (fields) => ({
   id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   time: new Date().toLocaleTimeString("en-GB"),
-  ...fields, // { origin, payload, status, detail? }
+  ...fields,
 });
 
 const STATUS_STYLES = {
@@ -18,7 +17,6 @@ const STATUS_STYLES = {
 export default function XRayConsole({ logs, onClear }) {
   const scrollRef = useRef(null);
 
-  // Keep the newest entry in view without scrolling the whole page.
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;

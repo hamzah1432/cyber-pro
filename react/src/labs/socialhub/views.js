@@ -1,5 +1,3 @@
-// views.js — local view switching. Nothing here touches window.location:
-// a "view" is a <section data-view="..."> inside the lab page.
 import { state, notify } from "./store.js";
 
 export const TRUSTED_VIEW = "#community-guidelines";
@@ -29,11 +27,10 @@ const LABELS = {
 export const viewLabel = (name) => LABELS[name] || name;
 export const isGuidelinesView = (name) => name.endsWith("-guidelines");
 
-/** Switch the visible view. Accepts 'feed' or '#community-guidelines'. */
 export function showLocalView(target, { focus = true } = {}) {
   let name = String(target).replace(/^#/, "");
   if (!VIEW_NAMES.has(name)) name = "feed";
   state.route = name;
-  state.focusView = focus ? name : null; // the view heading takes focus after render
+  state.focusView = focus ? name : null;
   notify();
 }

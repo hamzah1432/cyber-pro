@@ -1,8 +1,3 @@
-/* SocialHub — DOM Clobbering lab. Every rule is scoped under .socialhub.
-   DOMino palette (black, white, grays only) and DOMino type. The type scale is
-   the original five sizes, each 2px larger. Vulnerable/attacked states are
-   inverted white; fixed/blocked states are outlined. */
-
 .socialhub {
   --bg: #050505;
   --surface: #0d0d0f;
@@ -33,10 +28,9 @@
   --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
   --ease: 160ms ease;
   --wb-width: 500px;
-  --nav-h: 64px; /* the DOMino navbar above the lab */
+  --nav-h: 64px;
 }
 
-/* ---------- base ---------- */
 .socialhub, .socialhub *, .socialhub *::before, .socialhub *::after { box-sizing: border-box; }
 .socialhub {
   position: relative;
@@ -62,7 +56,6 @@
 .socialhub .skip-link { position: absolute; left: var(--s3); top: var(--s3); background: var(--ink); color: var(--bg); padding: var(--s2) var(--s3); border-radius: var(--r-md); z-index: 100; }
 .socialhub .skip-link:not(:focus) { width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* ---------- lab intro ---------- */
 .socialhub .lab-intro { display: flex; gap: var(--s5); align-items: flex-end; justify-content: space-between; padding: var(--s6) var(--s5) var(--s5); max-width: 1240px; margin: 0 auto; }
 .socialhub .lab-intro > .btn { flex: none; white-space: nowrap; }
 .socialhub .lab-back { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.2em; color: var(--ink-3); text-decoration: none; transition: color var(--ease); }
@@ -77,7 +70,6 @@
 .socialhub .mode-pill { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 1px 10px; border-radius: 999px; background: var(--ink); color: var(--bg); }
 .socialhub[data-mode="fixed"] .mode-pill { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.6); }
 
-/* ---------- buttons and fields ---------- */
 .socialhub .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); border: 1px solid transparent; border-radius: var(--r-md); padding: var(--s2) var(--s4); font-weight: 600; font-size: var(--fs-sm); cursor: pointer; background: transparent; transition: background var(--ease), border-color var(--ease), box-shadow var(--ease), color var(--ease); min-height: 38px; }
 .socialhub .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .socialhub .btn--primary { background: var(--ink); color: var(--bg); }
@@ -115,7 +107,6 @@
 .socialhub .badge--ok { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.6); color: var(--ink); }
 .socialhub .badge--warn { background: var(--ink); color: var(--bg); }
 
-/* ---------- avatars (grayscale tones) ---------- */
 .socialhub .avatar { width: 40px; height: 40px; flex: none; border-radius: 50%; display: inline-grid; place-items: center; font-size: var(--fs-sm); font-weight: 700; color: var(--ink); background: #3a3a40; box-shadow: inset 0 0 0 1px var(--line-strong); }
 .socialhub .avatar--small { width: 24px; height: 24px; font-size: calc(0.625rem + 2px); }
 .socialhub .avatar--large { width: 72px; height: 72px; font-size: var(--fs-lg); }
@@ -128,7 +119,6 @@
 .socialhub .avatar[data-tone="7"] { background: #454549; }
 .socialhub .avatar[data-tone="8"] { background: #26262b; }
 
-/* ---------- app shell ---------- */
 .socialhub .app { container-type: inline-size; container-name: app; max-width: 1240px; margin: 0 auto; padding: 0 var(--s5) var(--s6); }
 .socialhub .sh-header { position: sticky; top: var(--nav-h); z-index: 20; display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap; background: rgb(5 5 5 / 0.86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
 .socialhub .sh-brand { display: flex; align-items: center; gap: var(--s2); }
@@ -177,7 +167,6 @@
 .socialhub .tag-row:hover { text-decoration: underline; }
 .socialhub .tag-row__n { color: var(--ink-3); font-family: var(--font-mono); }
 
-/* ---------- composer ---------- */
 .socialhub .composer { padding: var(--s4); margin-bottom: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
 .socialhub .composer__top { display: flex; align-items: center; justify-content: space-between; }
 .socialhub .composer__actions { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
@@ -195,7 +184,6 @@
 .socialhub .empty { padding: var(--s5); text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--s3); }
 .socialhub .empty-note { color: var(--ink-3); padding: var(--s4) 0; }
 
-/* ---------- posts ---------- */
 .socialhub .post { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4); animation: sh-post-in 180ms ease both; }
 @keyframes sh-post-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .socialhub .post__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s3); flex-wrap: wrap; }
@@ -225,7 +213,6 @@
 .socialhub .comment__bubble { background: var(--surface-2); border-radius: var(--r-md); padding: var(--s1) var(--s3); font-size: var(--fs-sm); display: flex; flex-direction: column; }
 .socialhub .comments__form { display: flex; gap: var(--s2); }
 
-/* ---------- profile, communities, guidelines ---------- */
 .socialhub .profile { display: flex; gap: var(--s4); padding: var(--s5); margin-bottom: var(--s4); align-items: center; }
 .socialhub .profile__name { font-family: var(--font-display); font-size: var(--fs-lg); }
 .socialhub .profile__handle, .socialhub .profile__stats { color: var(--ink-3); font-size: var(--fs-sm); }
@@ -247,7 +234,6 @@
 .socialhub .rules--bullets li { counter-increment: none; }
 .socialhub .rules--bullets li::before { content: ""; width: 6px; height: 6px; background: var(--ink-3); box-shadow: none; left: 10px; top: 11px; }
 
-/* ---------- sources, toast ---------- */
 .socialhub .lab-sources { max-width: 1240px; margin: 0 auto; padding: var(--s5); border-top: 1px solid var(--line); }
 .socialhub .lab-sources h2 { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 500; text-transform: uppercase; letter-spacing: 0.2em; color: var(--ink-3); margin-bottom: var(--s2); }
 .socialhub .lab-sources ul { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); font-size: var(--fs-sm); }
@@ -256,7 +242,6 @@
 .socialhub .toast { position: fixed; left: 50%; bottom: var(--s5); transform: translate(-50%, 12px); background: var(--ink); color: var(--bg); padding: var(--s2) var(--s4); border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 180ms ease, transform 180ms ease; z-index: 60; max-width: 90vw; }
 .socialhub .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 
-/* ---------- Security Workbench ---------- */
 .socialhub .workbench { position: fixed; top: var(--nav-h); right: 0; bottom: 0; width: min(var(--wb-width), 100vw); z-index: 45; display: flex; flex-direction: column; background: var(--wb-bg); color: var(--wb-ink); border-left: 1px solid var(--wb-line); box-shadow: -12px 0 32px rgb(0 0 0 / 0.55); animation: sh-wb-in 180ms ease both; }
 @keyframes sh-wb-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 .socialhub .workbench code { background: rgb(255 255 255 / 0.08); color: var(--ink); }
@@ -295,7 +280,6 @@
 .socialhub .feedback--dark { background: rgb(255 255 255 / 0.05); color: var(--wb-ink); }
 .socialhub .hints { display: flex; flex-direction: column; gap: var(--s2); padding-left: var(--s4); list-style: decimal; color: var(--wb-ink-2); }
 
-/* Inspector */
 .socialhub .insp, .socialhub .compare { display: flex; flex-direction: column; border: 1px solid var(--wb-line); border-radius: var(--r-md); overflow: hidden; }
 .socialhub .insp > div, .socialhub .compare > div { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 12fr); gap: var(--s3); padding: 6px var(--s3); border-bottom: 1px solid var(--wb-line); }
 .socialhub .insp > div:last-child, .socialhub .compare > div:last-child { border-bottom: 0; }
@@ -307,7 +291,6 @@
 .socialhub .verdict[data-state="hijacked"] { background: var(--ink); color: var(--bg); }
 .socialhub .verdict[data-state="blocked"] { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 
-/* Source */
 .socialhub .code-head { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); flex-wrap: wrap; }
 .socialhub .code-meta { color: var(--wb-ink-2); font-family: var(--font-mono); font-size: var(--fs-xs); display: flex; align-items: center; gap: var(--s2); }
 .socialhub .code-running { color: var(--ink); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5); border-radius: 999px; padding: 0 8px; }
@@ -329,7 +312,6 @@
 .socialhub .code li[class^="is-flaw"] code { color: var(--ink); }
 .socialhub .code-note { color: var(--wb-ink); border-left: 2px solid var(--ink); padding-left: var(--s3); }
 
-/* History */
 .socialhub .history { display: flex; flex-direction: column; gap: 1px; background: var(--wb-line); border: 1px solid var(--wb-line); border-radius: var(--r-md); overflow: hidden; }
 .socialhub .history li { display: grid; grid-template-columns: 72px 92px 1fr; gap: var(--s2); padding: 6px var(--s3); background: var(--wb-panel); font-size: var(--fs-xs); align-items: baseline; }
 .socialhub .history time { color: var(--wb-ink-2); font-family: var(--font-mono); }
@@ -337,7 +319,6 @@
 .socialhub .history li[data-kind="navigation"] .hist-kind, .socialhub .history li[data-kind="collision"] .hist-kind { background: var(--ink); color: var(--bg); padding: 0 4px; border-radius: 3px; }
 .socialhub .history li[data-kind="blocked"] .hist-kind { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); padding: 0 4px; border-radius: 3px; }
 
-/* Docked on wide screens: the app and the Workbench are visible together. */
 @media (min-width: 1280px) {
   .socialhub.wb-open .lab-intro, .socialhub.wb-open .app, .socialhub.wb-open .lab-sources { margin-left: 0; margin-right: var(--wb-width); max-width: none; }
   .socialhub .workbench { box-shadow: none; }

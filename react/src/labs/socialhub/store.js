@@ -1,6 +1,3 @@
-// store.js — the single owner of lab state (from state.js), plus the UI state
-// several components share. Mutations change `state` in place and call
-// notify(); components re-render through useStore().
 import { useSyncExternalStore } from "react";
 import { createSeed, ME } from "./seed-data.js";
 import { sanitizedText } from "./safe-html.js";
@@ -43,7 +40,6 @@ function revoke(url) {
   try {
     URL.revokeObjectURL(url);
   } catch {
-    /* already revoked */
   }
 }
 
@@ -55,22 +51,20 @@ export function loadSeed() {
   Object.assign(state, seed);
 }
 
-/** A fresh lab on every visit: seed data plus default UI. */
 export function initStore() {
   releaseImages();
   Object.assign(state, {
-    mode: "vulnerable", // 'vulnerable' | 'fixed'
-    route: "feed", // one of the local views
+    mode: "vulnerable",
+    route: "feed",
     profileUser: ME,
     saved: new Set(),
     query: "",
     community: null,
-    sort: "latest", // 'latest' | 'popular'
-    editorText: "", // exact bytes of the shared HTML editor
-    pendingImage: null, // {url, name} for the composer attachment
-    history: [], // observed events only
-    lastRun: null, // result of the most recent Guidelines press
-    // shared UI
+    sort: "latest",
+    editorText: "",
+    pendingImage: null,
+    history: [],
+    lastRun: null,
     format: "plain",
     composerCommunity: "coding",
     composerError: "",
@@ -87,7 +81,6 @@ export function initStore() {
   loadSeed();
 }
 
-/** Revoke every object URL the lab created (leaving the page, or a fresh visit). */
 export function releaseImages() {
   revoke(state.pendingImage?.url);
   state.posts?.forEach((p) => revoke(p.imageUrl));
@@ -131,7 +124,6 @@ export function addPost({ kind, body, searchText, community, imageUrl = null }) 
   return post;
 }
 
-/** Removes every user-created post (and with it any attacker-controlled DOM). */
 export function removeUserPosts() {
   state.posts = state.posts.filter((p) => {
     if (p.seed) return true;
@@ -141,7 +133,6 @@ export function removeUserPosts() {
   });
 }
 
-/** Mode switch: wipe attack state, keep the payload editor and event history. */
 export function resetAttackState() {
   removeUserPosts();
   state.route = "feed";
@@ -151,7 +142,6 @@ export function resetAttackState() {
   state.lastRun = null;
 }
 
-/** Full reset: baseline data, empty history. Editor bytes and mode are preserved. */
 export function resetEnvironment() {
   releaseImages();
   const keep = { mode: state.mode, editorText: state.editorText };

@@ -26,8 +26,6 @@ const DEFAULT_PAYLOAD = `window.guardObserver.disconnect();
 document.getElementById('vuln-answer-wrapper').classList.remove('blurred-secret');
 document.getElementById('vuln-paywall').remove();`;
 
-// ── Vulnerable sandbox ──────────────────────────────────────────────────────
-
 function initVulnerableSandbox(vulnSandbox) {
   if (window.guardObserver) window.guardObserver.disconnect();
 
@@ -48,7 +46,6 @@ function initVulnerableSandbox(vulnSandbox) {
   const targetNode = document.getElementById("vuln-content-box");
 
   window.guardObserver = new MutationObserver(() => {
-    // Disconnect first so the wipe below doesn't re-trigger the observer.
     window.guardObserver.disconnect();
     vulnSandbox.innerHTML = `
       <p class="tamper-alert inline-block rounded-[3px] bg-white px-2 py-1 font-mono text-[14px] font-semibold tracking-[0.16em] text-[#050505]">⚠︎ TAMPERING DETECTED! ⚠︎</p>
@@ -57,8 +54,8 @@ function initVulnerableSandbox(vulnSandbox) {
   });
 
   window.guardObserver.observe(targetNode, {
-    attributes: true, // class/style changes (unblur)
-    childList: true, // element additions/removals (delete paywall)
+    attributes: true,
+    childList: true,
     subtree: true,
   });
 }
@@ -77,8 +74,6 @@ function vulnStopObserver() {
     if (status) setLine(status, "[Guard Status: MutationObserver Neutralized by Button Click!]", "strong");
   }
 }
-
-// ── Secure sandbox (simulated server) ───────────────────────────────────────
 
 async function simulateServerFetch(authToken) {
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -112,11 +107,9 @@ function initSecureSandbox(secureSandbox) {
     payBtn.textContent = "Authorizing with Server...";
     setLine(log, "Contacting payment gateway and server API...", "neutral");
 
-    // 1. Client calls the simulated server endpoint
     const serverResponse = await simulateServerFetch("VALID_USER_TOKEN_123");
-    if (!slot.isConnected) return; // sandbox was reset while waiting
+    if (!slot.isConnected) return;
 
-    // 2. Server sends back the answer only upon success
     if (serverResponse.success) {
       paywall.remove();
       slot.innerHTML = serverResponse.secretHtml;
@@ -146,8 +139,6 @@ function secureRunPayload() {
     "blocked"
   );
 }
-
-// ── Source listings ─────────────────────────────────────────────────────────
 
 const VULN_CODE = {
   file: "secret-box.html — vulnerable",
@@ -192,8 +183,6 @@ const SECURE_CODE = {
   ],
 };
 
-// ── Page ────────────────────────────────────────────────────────────────────
-
 function ControlButton({ onClick, children }) {
   return (
     <button
@@ -230,8 +219,6 @@ export default function Lab03PaywallBypass() {
   const executePayload = () => {
     setPayloadError(null);
     try {
-      // Runs whatever is in the textarea against this page, like a console —
-      // the reader controls their own browser, which is the point of the lab.
       new Function(payload)();
       const status = document.getElementById("vuln-status");
       if (status) setLine(status, "[Guard Status: Payload Executed via Text Area!]", "alert");
@@ -261,7 +248,6 @@ export default function Lab03PaywallBypass() {
         </p>
       </header>
 
-      {/* ── 1. Vulnerable implementation ─────────────────────────────────── */}
       <section id="vulnerable-section" className="py-12">
         <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
           1. Vulnerable Implementation (Client-Side Guard)
@@ -287,7 +273,6 @@ export default function Lab03PaywallBypass() {
 
       <hr className="border-white/10" />
 
-      {/* ── 2. Secure implementation ─────────────────────────────────────── */}
       <section id="secure-section" className="py-12">
         <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
           2. Secure Implementation (Simulated Server-Side Authorization)
@@ -313,7 +298,6 @@ export default function Lab03PaywallBypass() {
 
       <hr className="mb-16 border-white/10" />
 
-      {/* ── Visible payload input area ───────────────────────────────────── */}
       <section id="payload-area" className="glass rounded-xl p-6 sm:p-8">
         <h3 className="font-display text-xl font-bold text-white">Payload Injection Center</h3>
         <p className="mt-2 leading-7 text-white/65">

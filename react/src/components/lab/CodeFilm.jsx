@@ -1,8 +1,3 @@
-// A code listing styled as a film strip. One line can carry a mark:
-//   "fracture" — the line that causes the bug (hatched)
-//   "patch"    — the line that fixes it (double rule)
-// and a short note rendered directly beneath it.
-
 const KEYWORDS = new Set([
   "const", "let", "var", "function", "return", "if", "else", "new", "typeof",
   "null", "undefined", "true", "false", "import", "from", "export", "default",
@@ -47,7 +42,6 @@ const MARK_CHIP = {
   patch: "border border-white/60 text-white",
 };
 
-// `large` sets every size 2px up (Labs 01 and 03 read larger).
 const SIZE = {
   normal: { file: "text-[11px]", chip: "text-[9.5px]", code: "text-[12.5px] sm:text-[13px]", noteChip: "text-[9px]", note: "text-[12.5px]" },
   large: { file: "text-[13px]", chip: "text-[11.5px]", code: "text-[14.5px] sm:text-[15px]", noteChip: "text-[11px]", note: "text-[14.5px]" },

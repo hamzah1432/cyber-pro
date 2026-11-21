@@ -19,8 +19,6 @@ const jump = (id) =>
 const owaspLabel = (lab) =>
   lab.owaspCode ? `OWASP ${lab.owaspCode} · ${lab.owaspName}` : `OWASP attack class · ${lab.owaspName}`;
 
-/* One lab = one film plate taken off the homepage light-box and read in full.
-   Props carry the lab's content; the page owns layout, navigation and motion. */
 export default function LabPage({ lab, what, line, sandbox, why, incident, fix, sources, onVerifyFix }) {
   const articleRef = useRef(null);
 
@@ -34,7 +32,6 @@ export default function LabPage({ lab, what, line, sandbox, why, incident, fix, 
 
   return (
     <main className="mx-auto max-w-6xl px-4 sm:px-6">
-      {/* ── Plate header ─────────────────────────────────────────────────── */}
       <header className="grid items-center gap-12 pb-14 pt-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16 lg:pt-14">
         <div className="animate-rise">
           <a
@@ -73,7 +70,6 @@ export default function LabPage({ lab, what, line, sandbox, why, incident, fix, 
 
       <SectionStrip articleRef={articleRef} />
 
-      {/* ── The six sections ─────────────────────────────────────────────── */}
       <div ref={articleRef}>
         <Section id="what" n={1} title="What it is">
           <div className="max-w-2xl text-lg leading-8 text-white/75">{what}</div>
@@ -153,8 +149,6 @@ export default function LabPage({ lab, what, line, sandbox, why, incident, fix, 
   );
 }
 
-/* The homepage plate, now on the viewer: it lands on SURFACE, then scans
-   itself to X-RAY. The toggle lets the reader flip between the two. */
 function HeaderFilm({ lab }) {
   const { Surface, Xray, tag } = SPECIMENS[lab.id];
   const [xray, setXray] = useState(false);
@@ -222,8 +216,6 @@ function HeaderFilm({ lab }) {
   );
 }
 
-/* Sticky index of the six sections. The active one follows the reader, and a
-   1px scan line along the bottom edge tracks progress through the plate. */
 function SectionStrip({ articleRef }) {
   const [active, setActive] = useState("what");
   const barRef = useRef(null);
@@ -245,7 +237,6 @@ function SectionStrip({ articleRef }) {
       raf = 0;
       const el = articleRef.current;
       if (!el || !barRef.current) return;
-      // 0 when the first section reaches the strip, 1 at the bottom of the page
       const start = el.getBoundingClientRect().top + window.scrollY - 120;
       const end = document.documentElement.scrollHeight - window.innerHeight;
       const p = (window.scrollY - start) / Math.max(end - start, 1);

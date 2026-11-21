@@ -13,9 +13,7 @@ const TELEMETRY = [
 export default function Home() {
   return (
     <main id="top" className="mx-auto max-w-6xl px-4 sm:px-6">
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="grid items-center gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-16 lg:py-20">
-        {/* Left — copy */}
         <div className="animate-rise mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h1 className="font-display text-[2.6rem] font-bold leading-[1.02] text-white sm:text-6xl">
             See beneath the{" "}
@@ -38,15 +36,12 @@ export default function Home() {
           </a>
         </div>
 
-        {/* Right — the live widget, framed as a real app window */}
         <div className="animate-rise relative" style={{ animationDelay: "120ms" }}>
-          {/* white spotlight so the frosted glass catches light */}
           <div
             aria-hidden
             className="pointer-events-none absolute -inset-10 -z-10 rounded-[3rem] bg-white/[0.07] blur-3xl"
           />
           <div className="glass overflow-hidden rounded-xl shadow-2xl shadow-black/60">
-            {/* window chrome */}
             <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-3.5 py-2.5">
               <span className="flex gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
@@ -67,7 +62,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Telemetry strip ─────────────────────────────────────────────── */}
       <div className="-mx-4 border-y border-white/10 bg-white/[0.02] sm:-mx-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-2 px-4 py-3 font-mono text-[10px] tracking-wider sm:px-6 sm:text-[11px]">
           {TELEMETRY.map(([k, v], i) => (
@@ -84,7 +78,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── The labs ────────────────────────────────────────────────────── */}
       <section id="labs" className="scroll-mt-20 py-20">
         <p className="font-mono text-xs font-medium tracking-[0.25em] text-white/50">
           THREE INTERACTIVE LABS

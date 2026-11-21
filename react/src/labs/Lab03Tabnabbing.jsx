@@ -8,27 +8,11 @@ import { LABS } from "../lib/labsMeta.js";
 
 const meta = LABS[2];
 
-/* ─────────────────────────────────────────────────────────────────────────
-   SIMULATION — Reverse Tabnabbing.
-
-   A victim page lists user-submitted links opened with target="_blank". When
-   the opener grants the new tab a window.opener reference (no rel=noopener),
-   the opened page can run `window.opener.location = phishingUrl` and silently
-   navigate the ORIGINAL tab to a credential-phishing clone.
-
-   We can't (and shouldn't) actually navigate the real DOMino tab, so the
-   victim tab is modelled as a framed mini-browser whose address bar + body we
-   control. The link-opening logic is real: in vulnerable mode we hand the
-   popup an opener capability flag; the attacker payload then uses it to rewrite
-   the victim frame. In fixed mode rel="noopener" means window.opener is null,
-   so the same payload no-ops.
-   ───────────────────────────────────────────────────────────────────────── */
-
 const LEGIT_URL = "domino-forum.app/thread/8821";
 const PHISH_URL = "glassb0x-login.app/verify-session";
 
 const INITIAL = {
-  openerGranted: false, // did the victim hand out a window.opener capability?
+  openerGranted: false,
   popupOpen: false,
   victimUrl: LEGIT_URL,
   phished: false,
@@ -62,7 +46,6 @@ function MiniBrowser({ state, mode }) {
             : "border-slate-700"
       }`}
     >
-      {/* fake browser chrome */}
       <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900/70 px-3 py-2">
         <div className="flex gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-slate-700" />
@@ -81,7 +64,6 @@ function MiniBrowser({ state, mode }) {
         </div>
       </div>
 
-      {/* page body */}
       <div className="p-5">
         <div className="mb-3 flex items-center justify-between">
           <span className="flex items-center gap-2 text-sm font-semibold text-slate-100">
@@ -186,7 +168,6 @@ function Lab03Sandbox() {
       return;
     }
 
-    // "hijack" — the opened page tries window.opener.location = phishing.
     if (!state.popupOpen) {
       addLog({
         origin: "attacker-blog.example",
@@ -248,8 +229,6 @@ function Lab03Sandbox() {
     />
   );
 }
-
-/* ── Static lab content ─────────────────────────────────────────────────── */
 
 const VULN_CODE = {
   title: "forum-links.js — vulnerable",

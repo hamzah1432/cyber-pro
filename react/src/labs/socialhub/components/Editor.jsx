@@ -1,5 +1,3 @@
-// The shared HTML editor: the composer's Rich HTML box and the Workbench
-// editor are two views of the same bytes (state.editorText).
 import { state, useStore } from "../store.js";
 import { LIMITS } from "../safe-html.js";
 import { setEditorText } from "../actions.js";

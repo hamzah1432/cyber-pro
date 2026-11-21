@@ -1,6 +1,5 @@
 import { ShieldOff, ShieldCheck } from "lucide-react";
 
-// Prominent segmented toggle: Vulnerable Mode vs Fixed Mode.
 export default function ModeToggle({ mode, onChange }) {
   const base =
     "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-all duration-300 ease-out";

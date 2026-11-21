@@ -1,6 +1,3 @@
-// Fictional seed data. Every person, post and number below is invented demo content.
-// Timestamps are expressed as "minutes ago" and resolved when the seed is created.
-
 export const ME = 'sam';
 
 const USERS = [
@@ -22,7 +19,6 @@ const COMMUNITIES = [
   { id: 'questions',   name: 'Questions',   about: 'Ask anything, answer anything.' }
 ];
 
-// kind: 'plain' renders with textContent. 'rich' goes through the restricted sanitizer.
 const POSTS = [
   { id: 'p-1',  authorId: 'dana',   community: 'coding',      minutesAgo: 14,   likes: 12, kind: 'rich',
     body: '<strong>Spacing scale update.</strong> I replaced my random paddings with a 4/8/12/16/24/32 scale.<br>The layout stopped feeling <em>fiddly</em> in about ten minutes. #design #css' },
@@ -63,7 +59,7 @@ export function createSeed(now = Date.now()) {
     authorId: p.authorId,
     kind: p.kind,
     body: p.body,
-    searchText: '', // filled by feed.js using the sanitizer for rich posts
+    searchText: '',
     community: p.community,
     createdAt: now - p.minutesAgo * min,
     likes: p.likes,

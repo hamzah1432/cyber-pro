@@ -6,16 +6,6 @@ import { LABS } from "../lib/labsMeta.js";
 
 const lab = LABS[1];
 
-/* ─────────────────────────────────────────────────────────────────────────
-   REAL catastrophic backtracking.
-
-   Every payload runs the actual pattern with RegExp.test — but inside a
-   throwaway Web Worker, so a run that would hang for minutes can be killed
-   after BUDGET_MS instead of freezing this page. Times shown are measured on
-   the visitor's own device; the "full runtime" figure is extrapolated from
-   the growth measured between n=22 and n=24.
-   ───────────────────────────────────────────────────────────────────────── */
-
 const PATTERNS = {
   vulnerable: "^([a-zA-Z0-9]+)*$",
   fixed: "^[a-zA-Z0-9]{3,20}$",
@@ -47,7 +37,6 @@ function runRegex(source, input) {
   });
 }
 
-// ms for the vulnerable pattern at length n, from the growth between 22→24.
 async function estimateMs(n) {
   const a = await runRegex(PATTERNS.vulnerable, "a".repeat(22) + "!");
   const b = await runRegex(PATTERNS.vulnerable, "a".repeat(24) + "!");
@@ -86,7 +75,6 @@ function RedosSandbox({ mode, onModeChange }) {
     setPulse((p) => p + 1);
   };
 
-  // Live timer while a run is in flight (this page's main thread stays free).
   useEffect(() => {
     if (!running) return;
     let raf;
@@ -99,7 +87,7 @@ function RedosSandbox({ mode, onModeChange }) {
   }, [running]);
 
   const reset = useCallback(() => {
-    epoch.current += 1; // results from in-flight runs are dropped
+    epoch.current += 1;
     setUsername("");
     setRunning(false);
     setVerdict(null);
@@ -184,7 +172,6 @@ function RedosSandbox({ mode, onModeChange }) {
     const results = [];
     let hung = false;
     for (const n of SWEEP) {
-      // Once one length hits the budget, every longer one would too.
       const r = hung ? { timedOut: true, ms: BUDGET_MS } : await timed("a".repeat(n) + "!");
       if (e !== epoch.current) return;
       hung = hung || r.timedOut;

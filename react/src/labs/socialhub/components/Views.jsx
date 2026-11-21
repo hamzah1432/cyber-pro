@@ -1,7 +1,3 @@
-// The main column: every local view is a <section data-view> that stays in the
-// document and is hidden when inactive, so the feed (and any payload in it)
-// stays mounted while another view is showing. Secondary views render
-// ids-stripped copies, so a payload never exists twice.
 import { useEffect } from "react";
 import { state, useStore, getUser, ME } from "../store.js";
 import { filterCommunity, nav } from "../actions.js";
@@ -98,7 +94,6 @@ const BackToFeed = () => (
 export default function MainViews() {
   const s = useStore();
 
-  // Move focus to the heading of a view opened with { focus: true }.
   useEffect(() => {
     if (!s.focusView) return;
     const view = s.focusView;
@@ -150,7 +145,6 @@ export default function MainViews() {
         </article>
       </section>
 
-      {/* Unofficial views: reachable only through the flaw */}
       <section data-view="untrusted-guidelines" aria-label="Updated Community Rules" hidden={hidden("untrusted-guidelines")}>
         <article className="guidelines guidelines--unofficial card" data-guidelines-kind="untrusted">
           <p className="badge badge--warn">Unofficial · not from moderators</p>

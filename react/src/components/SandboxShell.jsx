@@ -1,9 +1,6 @@
 import { FlaskConical, RotateCcw } from "lucide-react";
 import ModeToggle from "./ModeToggle.jsx";
 
-// Shared layout for every lab's "Try it" section: header bar with the
-// Vulnerable/Fixed toggle, then a split-screen workspace — victim app on the
-// left, attacker payloads + X-Ray Console on the right.
 export default function SandboxShell({ mode, onModeChange, onReset, victim, attacker }) {
   const vulnerable = mode === "vulnerable";
 

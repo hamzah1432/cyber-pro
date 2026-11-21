@@ -8,21 +8,6 @@ import {
   Crosshair,
 } from "lucide-react";
 
-/* ───────────────────────────────────────────────────────────────────────────
-   XRayScanner — the signature interaction.
-
-   Two layers stacked in the same box:
-     • SurfaceMock  — a normal, trustworthy-looking payment app.
-     • XrayMock     — what's really underneath: the skeleton + the vulnerable
-                      line glowing red, like a fracture on an X-ray film.
-
-   A circular "lens" follows the pointer and clips the X-ray layer so you only
-   see through where the scanner is. When the pointer is away, the lens drifts
-   on a gentle idle sweep so the effect is alive on touch screens too.
-   All motion is driven in one requestAnimationFrame loop mutating styles
-   directly — no per-frame React re-renders.
-   ─────────────────────────────────────────────────────────────────────────── */
-
 export default function XRayScanner() {
   const wrapRef = useRef(null);
   const filmRef = useRef(null);
@@ -60,7 +45,6 @@ export default function XRayScanner() {
       st.x += (st.tx - st.x) * 0.16;
       st.y += (st.ty - st.y) * 0.16;
       if (filmRef.current) {
-        // 1px inside the ring so revealed code never touches the lens edge
         filmRef.current.style.clipPath = `circle(${st.r - 1}px at ${st.x}px ${st.y}px)`;
       }
       if (lensRef.current) {
@@ -93,10 +77,8 @@ export default function XRayScanner() {
       onPointerLeave={() => (s.current.active = false)}
       className="relative aspect-[16/10] w-full cursor-crosshair select-none overflow-hidden bg-[#0D0D0F]"
     >
-      {/* Layer 1 — the clean, normal-looking surface */}
       <SurfaceMock />
 
-      {/* Layer 2 — the X-ray, clipped to the lens */}
       <div
         ref={filmRef}
         className="film film-scanlines film-sweep absolute inset-0 overflow-hidden"
@@ -105,7 +87,6 @@ export default function XRayScanner() {
         <XrayMock />
       </div>
 
-      {/* The scanner lens / reticle */}
       <div
         ref={lensRef}
         className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full"
@@ -120,7 +101,6 @@ export default function XRayScanner() {
         />
       </div>
 
-      {/* Hint */}
       <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] tracking-wide text-white/50 backdrop-blur-sm">
         move across the panel to x-ray the app
       </div>
@@ -128,19 +108,9 @@ export default function XRayScanner() {
   );
 }
 
-function Corner({ className }) {
-  return (
-    <span
-      className={`pointer-events-none absolute h-4 w-4 border-white/40 ${className}`}
-    />
-  );
-}
-
-/* ── The normal surface: a trustworthy payment widget ────────────────────── */
 function SurfaceMock() {
   return (
     <div className="absolute inset-0 grid grid-cols-5">
-      {/* faux sidebar */}
       <div className="col-span-2 hidden flex-col gap-3 border-r border-white/10 bg-white/[0.02] p-5 sm:flex">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 bg-white/5">
@@ -162,7 +132,6 @@ function SurfaceMock() {
         </div>
       </div>
 
-      {/* main panel */}
       <div className="col-span-5 flex items-center justify-center p-5 sm:col-span-3">
         <div className="w-full max-w-xs rounded-xl border border-white/10 bg-[#0D0D0F] p-5 shadow-xl backdrop-blur">
           <div className="flex items-center justify-between">
@@ -202,11 +171,9 @@ function SurfaceMock() {
   );
 }
 
-/* ── The X-ray: the skeleton + the fracture (vulnerable line) ────────────── */
 function XrayMock() {
   return (
     <div className="absolute inset-0 grid grid-cols-5 text-white/85">
-      {/* wireframe sidebar bones */}
       <div className="col-span-2 hidden flex-col gap-3 border-r border-white/15 p-5 sm:flex">
         <div className="h-7 w-7 rounded-md border border-white/25" />
         <div className="mt-2 space-y-2">
@@ -221,9 +188,7 @@ function XrayMock() {
         </div>
       </div>
 
-      {/* exposed internals */}
       <div className="relative col-span-5 flex items-center justify-center p-4 sm:col-span-3">
-        {/* wireframe of the card */}
         <div className="w-full max-w-xs rounded-xl border border-white/20 p-4">
           <div className="mb-3 flex items-center justify-between">
             <span className="font-mono text-[10px] tracking-widest text-white/60">
@@ -232,7 +197,6 @@ function XrayMock() {
             <AlertTriangle size={13} className="animate-blip text-white" />
           </div>
 
-          {/* the vulnerable code, exposed */}
           <pre className="rounded-lg border border-white/10 bg-black/50 p-3 font-mono text-[10px] leading-5">
             <div className="text-white/55">window.addEventListener(</div>
             <div className="text-white/55">  "message", (e) =&gt; {"{"}</div>
@@ -254,7 +218,6 @@ function XrayMock() {
           </div>
         </div>
 
-        {/* ticker */}
         <span className="absolute left-4 top-3 font-mono text-[9px] tracking-[0.25em] text-white/70">
           ▸ VULNERABILITY DETECTED
         </span>

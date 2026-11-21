@@ -1,4 +1,3 @@
-// Small pill badge used for OWASP / CWE categories and status labels.
 const TONES = {
   slate: "border-slate-700 bg-slate-800/60 text-slate-300",
   red: "border-red-500/30 bg-red-500/10 text-red-400",

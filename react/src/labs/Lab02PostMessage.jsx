@@ -8,21 +8,6 @@ import { LABS } from "../lib/labsMeta.js";
 
 const meta = LABS[1];
 
-/* ─────────────────────────────────────────────────────────────────────────
-   REAL SIMULATION — no fakery.
-
-   The attacker lives in a sandboxed iframe (allow-scripts, WITHOUT
-   allow-same-origin), so the browser gives it an opaque origin: messages it
-   posts to this window arrive with event.origin === "null". That is a
-   genuinely untrusted cross-origin sender, exactly like a hostile page
-   embedding your widget.
-
-   - Vulnerable mode: the window "message" handler executes event.data
-     without ever reading event.origin → wallet state is hijacked.
-   - Fixed mode: the handler drops any message whose event.origin doesn't
-     match the trusted origin → identical payloads die before touching state.
-   ───────────────────────────────────────────────────────────────────────── */
-
 const ATTACKER_SRCDOC = `<script>
   // evil.example — attacker page loaded in a sandboxed (opaque-origin) frame.
   // It relays whatever payload the payload buttons hand it straight into the
@@ -143,19 +128,16 @@ function Lab02Sandbox() {
     setLogs((prev) => [...prev, logEntry(fields)]);
   }, []);
 
-  // The victim's REAL message handler — re-registered whenever mode flips.
   useEffect(() => {
     const trustedOrigin = window.location.origin;
 
     const onMessage = (event) => {
       const data = event.data;
-      // Ignore unrelated traffic (devtools, extensions), not a security check.
       if (!data || typeof data !== "object" || !KNOWN_TYPES.has(data.type)) return;
 
       const payloadStr = JSON.stringify(data);
 
       if (mode === "fixed" && event.origin !== trustedOrigin) {
-        // THE FIX: event.origin is stamped by the browser and unforgeable.
         addLog({
           origin: `"${event.origin}" (sandboxed attacker frame)`,
           payload: payloadStr,
@@ -165,7 +147,6 @@ function Lab02Sandbox() {
         return;
       }
 
-      // VULNERABLE PATH: event.data is executed, event.origin never read.
       if (data.type === "SET_PAYOUT_ADDRESS") {
         setWallet((w) => ({
           ...w,
@@ -223,8 +204,6 @@ function Lab02Sandbox() {
       status: "SENT",
       detail: `Dispatching via window.parent.postMessage(payload, "*") from the sandboxed frame…`,
     });
-    // Hand the payload to the attacker iframe; IT posts to the victim window,
-    // so the message truly arrives cross-origin (event.origin === "null").
     iframeRef.current?.contentWindow?.postMessage({ cmd: "fire", payload: payload.data }, "*");
   };
 
@@ -257,7 +236,6 @@ function Lab02Sandbox() {
 
           <XRayConsole logs={logs} onClear={() => setLogs([])} />
 
-          {/* The real attacker: sandboxed, scripts only, opaque origin. */}
           <iframe
             ref={iframeRef}
             sandbox="allow-scripts"
@@ -270,8 +248,6 @@ function Lab02Sandbox() {
     />
   );
 }
-
-/* ── Static lab content ─────────────────────────────────────────────────── */
 
 const VULN_CODE = {
   title: "wallet-widget.js — vulnerable",

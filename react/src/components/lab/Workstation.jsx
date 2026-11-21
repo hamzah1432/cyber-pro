@@ -1,10 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Lock, RotateCcw, Trash2 } from "lucide-react";
 
-/* Shared building blocks for every lab's "Try it" sandbox. Outcome states are
-   told apart by contrast, not colour: EXPLOITED is an inverted white chip,
-   BLOCKED an outlined one, so the page stays strictly monochrome. */
-
 export const logEntry = (fields) => ({
   id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   time: new Date().toLocaleTimeString("en-GB"),
@@ -73,8 +69,6 @@ const STATUS = {
   blocked: { label: "BLOCKED", cls: "border border-white/60 px-1.5 text-white" },
 };
 
-// A mini browser window. `pulse` is a counter: bump it to replay the
-// exploit sweep (status "exploited") or the deflect ring (status "blocked").
 export function VictimWindow({ url, status = "live", pulse = 0, children }) {
   const s = STATUS[status];
   return (

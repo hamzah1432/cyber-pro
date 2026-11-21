@@ -1,8 +1,3 @@
-// DOMino mark: a domino tile caught mid-scan. The solid upper half is the
-// surface; the hollow lower half is the X-ray view, where the domino's three
-// pips are wired as a DOM tree. The bar through the middle is the scan plane.
-// Drawn on a 32-unit grid so it renders crisply at 16/32px.
-// Geometry must stay identical to public/favicon.svg.
 export default function BrandMark({ className = "" }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true" focusable="false">

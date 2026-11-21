@@ -1,5 +1,3 @@
-// Page chrome around the SocialHub app: lab intro, header, navigation,
-// context aside and sources.
 import { state, useStore } from "../store.js";
 import { isGuidelinesView } from "../views.js";
 import { openGuidelines } from "../guidelines.js";

@@ -1,7 +1,3 @@
-// Lightweight, dependency-free syntax highlighting for the short JS snippets
-// shown in "The line" and "The fix" sections. Lines may be flagged
-// hl: "red" | "green" with an optional `note` annotation rendered beneath.
-
 const KEYWORDS = new Set([
   "const", "let", "var", "function", "return", "if", "else", "new", "typeof",
   "null", "undefined", "true", "false", "import", "from", "export", "default",
