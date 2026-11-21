@@ -1,366 +1,351 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import LabPage from "../components/lab/LabPage.jsx";
-import { Workstation, VictimWindow, PayloadButton, Console, logEntry } from "../components/lab/Workstation.jsx";
-import { LABS } from "../lib/labsMeta.js";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import CodeFilm from "../components/lab/CodeFilm.jsx";
+import FOX_IMAGE_URL from "../assets/fox-67.png";
 
-const lab = LABS[2];
+const SECRET_HTML_CONTENT = `
+  <div>
+    <img src="${FOX_IMAGE_URL}" alt="Derpy Fox saying 67" class="fox-image w-full max-w-[180px] rounded-lg border border-white/20 bg-white">
+    <p class="mt-3 text-sm text-white/80"><strong class="text-white">Answer:</strong> 67</p>
+  </div>
+`;
 
-/* ─────────────────────────────────────────────────────────────────────────
-   REAL client-side paywall, attacked the way a reader would.
-
-   The article is rendered by plain JavaScript into a DOM node React doesn't
-   manage, exactly like a news site's own script. Payloads then do what a
-   reader can do in DevTools: delete nodes, edit classes, write localStorage,
-   read the API response.
-
-   The "server" is a function on the far side of a boundary the reader can't
-   touch: in the vulnerable build it sends every paragraph to everyone; in the
-   patched build it checks the session's subscription and sends the teaser.
-   ───────────────────────────────────────────────────────────────────────── */
-
-const ARTICLE = {
-  title: "How the merger really happened",
-  byline: "By M. Okafor · Business · 6 min read",
-  teaser: [
-    "When Halden Freight announced its takeover of Corvo Logistics in March, both boards called it a merger of equals.",
-    "Internal emails tell a different story — one that starts eight months earlier, in a hotel lobby in Rotterdam.",
-  ],
-  premium: [
-    "Halden's chief executive had secured financing for the deal before Corvo's board knew talks existed.",
-    "Three Corvo directors were offered advisory roles worth more than their annual pay, contingent on a yes vote.",
-    "The deal closed on the last day of the quarter, two weeks before regulators could formally object.",
-  ],
+const LINE_BASE = "mt-4 w-fit font-mono text-[11.5px] leading-5 tracking-wide";
+const TONE = {
+  neutral: "text-white/55",
+  strong: "text-white",
+  alert: "rounded-[3px] bg-white px-1.5 py-0.5 text-[#050505]",
+  blocked: "rounded-[3px] border border-white/60 px-1.5 py-0.5 text-white",
 };
-const VISITOR = { userId: "u_2041" };
-const SUBSCRIBERS = new Set(["u_8812"]); // lives on the server; the visitor isn't in it
-
-function api(build) {
-  const { title, byline, teaser, premium } = ARTICLE;
-  if (build === "vulnerable") return { title, byline, html: [...teaser, ...premium], premiumFrom: teaser.length };
-  const paid = SUBSCRIBERS.has(VISITOR.userId);
-  return { title, byline, html: paid ? [...teaser, ...premium] : teaser, locked: !paid };
+function setLine(el, text, tone) {
+  el.textContent = text;
+  el.className = `${LINE_BASE} ${TONE[tone]}`;
 }
 
-let memoFlag = null; // fallback when localStorage is unavailable
-const storage = {
-  get: () => {
-    try {
-      return localStorage.getItem("isPremium");
-    } catch {
-      return memoFlag;
-    }
-  },
-  set: (v) => {
-    memoFlag = v;
-    try {
-      localStorage.setItem("isPremium", v);
-    } catch {
-      /* private mode etc. — memoFlag carries it */
-    }
-  },
-  clear: () => {
-    memoFlag = null;
-    try {
-      localStorage.removeItem("isPremium");
-    } catch {
-      /* nothing stored */
-    }
-  },
-};
+const DEFAULT_PAYLOAD = `window.guardObserver.disconnect();
+document.getElementById('vuln-answer-wrapper').classList.remove('blurred-secret');
+document.getElementById('vuln-paywall').remove();`;
 
-const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+// ── Vulnerable sandbox ──────────────────────────────────────────────────────
 
-const PAYWALL = `
-  <div class="paywall absolute inset-x-0 bottom-0 flex h-[62%] items-end justify-center bg-gradient-to-t from-[#0D0D0F] via-[#0D0D0F]/95 to-transparent pb-5">
-    <div class="flex items-center gap-3 rounded-md border border-white/15 bg-[#111114] px-4 py-2.5">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/70"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      <span class="text-[12px] text-white/75">Subscribers only</span>
-      <span class="rounded bg-white px-2 py-1 text-[11px] font-semibold text-[#050505]">Unlock · $4.99</span>
+function initVulnerableSandbox(vulnSandbox) {
+  if (window.guardObserver) window.guardObserver.disconnect();
+
+  vulnSandbox.innerHTML = `
+    <div id="vuln-content-box">
+      <p class="text-[15px] text-white/80"><strong class="text-white">Question:</strong> What does the fox say?</p>
+      <div id="vuln-answer-wrapper" class="blurred-secret mt-3">
+        ${SECRET_HTML_CONTENT}
+      </div>
+      <div id="vuln-paywall" class="mt-4 rounded-md border-2 border-dashed border-white/40 bg-white/[0.03] p-4">
+        <p class="font-mono text-[11px] tracking-[0.2em] text-white">PAYWALL ACTIVE</p>
+        <p class="mt-1 text-sm text-white/70">Pay $2 to unlock the answer!</p>
+      </div>
     </div>
-  </div>`;
+    <p id="vuln-status" class="${LINE_BASE} ${TONE.neutral}">[Guard Status: MutationObserver Active]</p>
+  `;
 
-// The site's own render step. `view.lock` blurs premium paragraphs (CSS
-// .locked); `view.paywall` draws the overlay.
-function renderArticle(el, res, view) {
-  const paras = res.html
-    .map((text, i) => {
-      const premium = res.premiumFrom != null && i >= res.premiumFrom;
-      const cls = ["para text-[13px] leading-6 text-white/75", premium && "premium", premium && view.lock && "locked"]
-        .filter(Boolean)
-        .join(" ");
-      return `<p class="${cls}">${esc(text)}</p>`;
-    })
-    .join("");
-  el.innerHTML = `
-    <p class="font-mono text-[10px] tracking-[0.25em] text-white/40">THE LEDGER · BUSINESS</p>
-    <h3 class="font-display mt-2 text-xl font-bold leading-tight text-white">${esc(res.title)}</h3>
-    <p class="mt-1 text-[11px] text-white/40">${esc(res.byline)}</p>
-    <div class="mt-4 space-y-3">${paras}</div>
-    ${view.paywall ? PAYWALL : ""}`;
+  const targetNode = document.getElementById("vuln-content-box");
+
+  window.guardObserver = new MutationObserver(() => {
+    // Disconnect first so the wipe below doesn't re-trigger the observer.
+    window.guardObserver.disconnect();
+    vulnSandbox.innerHTML = `
+      <p class="tamper-alert inline-block rounded-[3px] bg-white px-2 py-1 font-mono text-[12px] font-semibold tracking-[0.16em] text-[#050505]">⚠︎ TAMPERING DETECTED! ⚠︎</p>
+      <p class="mt-3 text-sm text-white/70">Unauthorized DOM modification blocked. Page content deleted.</p>
+    `;
+  });
+
+  window.guardObserver.observe(targetNode, {
+    attributes: true, // class/style changes (unblur)
+    childList: true, // element additions/removals (delete paywall)
+    subtree: true,
+  });
 }
 
-const clientView = {
-  // Vulnerable: the browser decides, from a flag the reader controls.
-  vulnerable: () => {
-    const premiumUser = storage.get() === "true";
-    return { lock: !premiumUser, paywall: !premiumUser };
-  },
-  // Patched: the browser just shows what the server chose to send.
-  fixed: (res) => ({ lock: false, paywall: res.locked }),
-};
+function vulnRemoveOverlay() {
+  const paywall = document.getElementById("vuln-paywall");
+  const answerWrapper = document.getElementById("vuln-answer-wrapper");
+  if (paywall) paywall.remove();
+  if (answerWrapper) answerWrapper.classList.remove("blurred-secret");
+}
 
-const domStats = (el) => ({
-  paras: el.querySelectorAll("p.para").length,
-  premium: el.querySelectorAll("p.premium").length,
-  locked: el.querySelectorAll("p.locked").length,
-  paywall: !!el.querySelector(".paywall"),
-});
-const wordCount = (nodes) => nodes.reduce((n, p) => n + p.textContent.trim().split(/\s+/).length, 0);
-const preview = (res) =>
-  JSON.stringify({ ...res, html: res.html.map((t) => (t.length > 34 ? `${t.slice(0, 34)}…` : t)) }, null, 2);
+function vulnStopObserver() {
+  if (window.guardObserver) {
+    window.guardObserver.disconnect();
+    const status = document.getElementById("vuln-status");
+    if (status) setLine(status, "[Guard Status: MutationObserver Neutralized by Button Click!]", "strong");
+  }
+}
 
-function PaywallSandbox({ mode, onModeChange }) {
-  const articleRef = useRef(null);
-  const [stats, setStats] = useState(null);
-  const [flag, setFlag] = useState(null);
-  const [network, setNetwork] = useState(null);
-  const [status, setStatus] = useState("live");
-  const [pulse, setPulse] = useState(0);
-  const [logs, setLogs] = useState([]);
+// ── Secure sandbox (simulated server) ───────────────────────────────────────
 
-  const addLog = useCallback((f) => setLogs((l) => [...l, logEntry(f)]), []);
-  const hit = (s) => {
-    setStatus(s);
-    setPulse((p) => p + 1);
-  };
-  const refresh = () => {
-    setStats(domStats(articleRef.current));
-    setFlag(storage.get());
-  };
+async function simulateServerFetch(authToken) {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  if (authToken === "VALID_USER_TOKEN_123") {
+    return { success: true, secretHtml: SECRET_HTML_CONTENT };
+  }
+  return { success: false, error: "Invalid or missing auth token." };
+}
 
-  // The page load: request the article, then let the client decide what shows.
-  const load = useCallback(() => {
-    const res = api(mode);
-    renderArticle(articleRef.current, res, clientView[mode](res));
-    setStats(domStats(articleRef.current));
-    setFlag(storage.get());
-    return res;
-  }, [mode]);
+function initSecureSandbox(secureSandbox) {
+  secureSandbox.innerHTML = `
+    <div id="secure-box">
+      <p class="text-[15px] text-white/80"><strong class="text-white">Question:</strong> What does the fox say?</p>
+      <div id="secure-paywall" class="mt-4 rounded-md border-2 border-white/40 bg-white/[0.03] p-4">
+        <p class="font-mono text-[11px] tracking-[0.2em] text-white">PAYWALL ACTIVE</p>
+        <p class="mt-1 text-sm italic text-white/60">[Content withheld by server]</p>
+        <button type="button" id="secure-btn-pay" class="mt-3 rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-[#050505] transition-all duration-300 hover:shadow-[0_0_24px_rgba(255,255,255,0.3)] disabled:cursor-wait disabled:opacity-60">Simulate Valid $2 Payment (Get Token)</button>
+      </div>
+      <div id="secure-answer-slot" class="mt-4"></div>
+    </div>
+    <p id="secure-log" class="${LINE_BASE} ${TONE.neutral}"></p>
+  `;
 
-  const reset = useCallback(() => {
-    storage.clear();
-    load();
-    setNetwork(null);
-    setStatus("live");
-    setLogs([
-      logEntry({
-        origin: "sandbox",
-        status: "INFO",
-        detail:
-          mode === "fixed"
-            ? "PATCHED build — the server sends premium text only to subscribed sessions."
-            : "VULNERABLE build — the server sends every paragraph; the browser hides some.",
-      }),
-    ]);
-  }, [mode, load]);
+  secureSandbox.querySelector("#secure-btn-pay").addEventListener("click", async () => {
+    const paywall = document.getElementById("secure-paywall");
+    const slot = document.getElementById("secure-answer-slot");
+    const log = document.getElementById("secure-log");
+    const payBtn = document.getElementById("secure-btn-pay");
 
-  useEffect(() => {
-    reset();
-  }, [reset]);
-  useEffect(() => () => storage.clear(), []);
+    payBtn.disabled = true;
+    payBtn.textContent = "Authorizing with Server...";
+    setLine(log, "Contacting payment gateway and server API...", "neutral");
 
-  const deleteOverlay = () => {
-    const root = articleRef.current;
-    root.querySelector(".paywall")?.remove();
-    root.querySelectorAll(".locked").forEach((p) => p.classList.remove("locked"));
-    const premium = [...root.querySelectorAll("p.premium")];
-    refresh();
-    if (premium.length) {
-      hit("exploited");
-      addLog({
-        origin: "devtools · elements",
-        payload: `$(".paywall").remove(); $$(".locked").forEach(p => p.classList.remove("locked"))`,
-        status: "EXPLOITED",
-        detail: `${premium.length} premium paragraphs (${wordCount(premium)} words) were in the DOM all along — only CSS was hiding them.`,
-      });
+    // 1. Client calls the simulated server endpoint
+    const serverResponse = await simulateServerFetch("VALID_USER_TOKEN_123");
+    if (!slot.isConnected) return; // sandbox was reset while waiting
+
+    // 2. Server sends back the answer only upon success
+    if (serverResponse.success) {
+      paywall.remove();
+      slot.innerHTML = serverResponse.secretHtml;
+      setLine(log, "[Vault Log: Payment verified by server. Secret data injected into DOM.]", "strong");
     } else {
-      hit("blocked");
-      addLog({
-        origin: "devtools · elements",
-        payload: `$(".paywall").remove()`,
-        status: "BLOCKED",
-        detail: `Overlay gone, nothing underneath: the server sent only the ${ARTICLE.teaser.length}-paragraph teaser.`,
-      });
+      setLine(log, `[Vault Error: ${serverResponse.error}]`, "alert");
+      payBtn.disabled = false;
+      payBtn.textContent = "Simulate Valid $2 Payment";
     }
-  };
+  });
+}
 
-  const flipFlag = () => {
-    storage.set("true");
-    const res = load(); // the site re-renders, as on a page refresh
-    const s = domStats(articleRef.current);
-    setNetwork(null);
-    if (s.premium > 0 && s.locked === 0 && !s.paywall) {
-      hit("exploited");
-      addLog({
-        origin: "devtools · console",
-        payload: 'localStorage.setItem("isPremium", "true")',
-        status: "EXPLOITED",
-        detail: "After a refresh the client read the flag and unlocked the article itself.",
-      });
-    } else {
-      hit("blocked");
-      addLog({
-        origin: "devtools · console",
-        payload: 'localStorage.setItem("isPremium", "true")',
-        status: "BLOCKED",
-        detail: `GET /api/articles/merger still returned ${res.html.length} teaser paragraphs and "locked": true. The server checks the session's subscription; localStorage never leaves the browser.`,
-      });
-    }
-  };
+function secureRemoveOverlay() {
+  const paywall = document.getElementById("secure-paywall");
+  const log = document.getElementById("secure-log");
+  if (paywall) {
+    paywall.remove();
+    setLine(log, "[Attack Result: Paywall UI deleted, but the secret data was never loaded into the browser.]", "blocked");
+  }
+}
 
-  const readResponse = () => {
-    const res = api(mode);
-    setNetwork(res);
-    if (mode === "vulnerable") {
-      hit("exploited");
-      addLog({
-        origin: "devtools · network",
-        payload: "GET /api/articles/merger → 200",
-        status: "EXPLOITED",
-        detail: `The response body holds all ${res.html.length} paragraphs, premium included. The paywall is only paint.`,
-      });
-    } else {
-      hit("blocked");
-      addLog({
-        origin: "devtools · network",
-        payload: "GET /api/articles/merger → 200",
-        status: "BLOCKED",
-        detail: `${res.html.length} teaser paragraphs and "locked": true. The premium text never left the server.`,
-      });
-    }
-  };
-
-  return (
-    <Workstation
-      plate={lab.num}
-      mode={mode}
-      onModeChange={onModeChange}
-      onReset={reset}
-      victim={
-        <VictimWindow url="theledger.news/business/merger" status={status} pulse={pulse}>
-          <div ref={articleRef} className="article-body relative min-h-[360px] p-5" />
-          <div className="border-t border-dashed border-white/15 px-5 py-3 font-mono text-[11px]">
-            <p className="text-white/35">X-RAY · {network ? "NETWORK" : "PAGE STATE"}</p>
-            {network ? (
-              <>
-                <p className="mt-1 text-white/70">GET /api/articles/merger · 200</p>
-                <pre className="console-scroll mt-1.5 max-h-36 overflow-auto text-[10.5px] leading-[1.55] text-white/60">{preview(network)}</pre>
-              </>
-            ) : (
-              stats && (
-                <p className="mt-1 leading-5 text-white/55">
-                  DOM → <span className="text-white">{stats.paras}</span> paragraphs ·{" "}
-                  <span className="text-white">{stats.locked}</span> locked · paywall{" "}
-                  <span className="text-white">{stats.paywall ? "on" : "off"}</span>
-                  <br />
-                  localStorage.isPremium → <span className="text-white">{flag === null ? "null" : `"${flag}"`}</span>
-                </p>
-              )
-            )}
-          </div>
-        </VictimWindow>
-      }
-      payloads={
-        <>
-          <PayloadButton n="01" title="Delete the overlay" code={`$(".paywall").remove()  // + unblur .locked`} onClick={deleteOverlay} />
-          <PayloadButton n="02" title="Flip the premium flag" code={`localStorage.setItem("isPremium", "true")`} onClick={flipFlag} />
-          <PayloadButton n="03" title="Read the API response" code={`await (await fetch("/api/articles/merger")).json()`} onClick={readResponse} />
-        </>
-      }
-      console={<Console logs={logs} onClear={() => setLogs([])} />}
-    />
+function secureRunPayload() {
+  const log = document.getElementById("secure-log");
+  setLine(
+    log,
+    "[Attack Result: Payload executed, but there is no client-side MutationObserver guarding the DOM. This attack vector fails.]",
+    "blocked"
   );
 }
 
-const LINE = {
-  file: "article.js — vulnerable",
+// ── Source listings ─────────────────────────────────────────────────────────
+
+const VULN_CODE = {
+  file: "secret-box.html — vulnerable",
   lines: [
-    { code: "// article.js — load the story, then gate it" },
-    { code: "const res = await fetch(`/api/articles/${id}`);" },
-    { code: "const article = await res.json(); // every paragraph, for every visitor" },
+    { code: '<div id="secret-box">' },
+    { code: "  <p>What does the fox say?</p>" },
+    { code: '  <div id="vuln-answer-wrapper" class="blurred-secret"><img src="fox-67.png"></div>', mark: "fracture" },
+    { code: '  <div id="vuln-paywall">Pay $2 to unlock!</div>' },
+    { code: "</div>" },
     { code: "" },
-    { code: "body.innerHTML = renderParagraphs(article.html);" },
-    { code: "" },
-    {
-      code: 'if (localStorage.getItem("isPremium") !== "true") {',
-      mark: "fracture",
-      note: "The decision to lock the article runs in the visitor's browser, after the full text has already arrived. Anyone can flip this flag or skip the check.",
-    },
-    { code: '  body.querySelectorAll("p.premium")' },
-    { code: '    .forEach((p) => p.classList.add("locked")); // CSS blurs .locked' },
-    { code: "  showPaywall();" },
-    { code: "}" },
+    { code: "<script>" },
+    { code: "  const target = document.getElementById('secret-box');" },
+    { code: "  window.guardObserver = new MutationObserver(() => {", mark: "fracture" },
+    { code: "    target.innerHTML = '<p class=\"tamper-alert\">TAMPERING DETECTED! Content deleted.</p>';", mark: "fracture" },
+    { code: "  });", mark: "fracture" },
+    { code: "  window.guardObserver.observe(target, { childList: true, subtree: true, attributes: true });", mark: "fracture" },
+    { code: "</script>" },
   ],
 };
 
-const FIX = {
-  file: "server.js — patched",
+const SECURE_CODE = {
+  file: "secure-box.html — secure",
   lines: [
-    { code: "// server.js — the server decides what each session may read" },
-    { code: 'app.get("/api/articles/:id", async (req, res) => {' },
-    { code: "  const article = await db.articles.find(req.params.id);" },
-    { code: "  const paid = await billing.isSubscriber(req.session.userId);" },
+    { code: '<div id="secure-box">' },
+    { code: "  <p>What does the fox say?</p>" },
+    { code: '  <div id="secure-paywall">Pay $2 to unlock</div>' },
+    { code: '  <div id="secure-answer-slot"></div>', mark: "patch" },
+    { code: "</div>" },
     { code: "" },
-    { code: "  res.json({" },
-    { code: "    title: article.title," },
-    {
-      code: "    html: paid ? article.html : article.teaser,",
-      mark: "patch",
-      note: "Non-subscribers never receive the premium paragraphs, so there is nothing in the page to unhide.",
-    },
-    { code: "    locked: !paid," },
-    { code: "  });" },
-    { code: "});" },
+    { code: "<script>" },
+    { code: "  // Simulated network request to backend API" },
+    { code: "  async function unlockContent(authToken) {" },
+    { code: "    const response = await fetch('/api/get-secret', {", mark: "patch" },
+    { code: "      headers: { 'Authorization': `Bearer ${authToken}` }", mark: "patch" },
+    { code: "    });", mark: "patch" },
+    { code: "    if (response.ok) {", mark: "patch" },
+    { code: "      const data = await response.json();", mark: "patch" },
+    { code: "      document.getElementById('secure-answer-slot').innerHTML = data.secretHtml;", mark: "patch" },
+    { code: "    }", mark: "patch" },
+    { code: "  }" },
+    { code: "</script>" },
   ],
 };
+
+// ── Page ────────────────────────────────────────────────────────────────────
+
+function ControlButton({ onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-md border border-white/15 bg-white/[0.03] px-4 py-2 font-mono text-[12px] tracking-wide text-white/80 transition-all duration-300 hover:border-white/40 hover:text-white"
+    >
+      {children}
+    </button>
+  );
+}
+
+const Code = ({ children }) => <code className="font-mono text-[0.9em] text-white">{children}</code>;
 
 export default function Lab03PaywallBypass() {
-  const [mode, setMode] = useState("vulnerable");
+  const vulnRef = useRef(null);
+  const secureRef = useRef(null);
+  const [payload, setPayload] = useState(DEFAULT_PAYLOAD);
+  const [payloadError, setPayloadError] = useState(null);
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = "Security Lab: Client-Side Paywall Bypass";
+    window.guardObserver = null;
+    initVulnerableSandbox(vulnRef.current);
+    initSecureSandbox(secureRef.current);
+    return () => {
+      document.title = previousTitle;
+      window.guardObserver?.disconnect();
+      window.guardObserver = null;
+    };
+  }, []);
+
+  const executePayload = () => {
+    setPayloadError(null);
+    try {
+      // Runs whatever is in the textarea against this page, like a console —
+      // the reader controls their own browser, which is the point of the lab.
+      new Function(payload)();
+      const status = document.getElementById("vuln-status");
+      if (status) setLine(status, "[Guard Status: Payload Executed via Text Area!]", "alert");
+    } catch (error) {
+      console.error("Payload execution failed:", error);
+      setPayloadError(`Payload execution failed: ${error.message}`);
+    }
+  };
+
   return (
-    <LabPage
-      lab={lab}
-      what={
-        <>
-          A client-side paywall sends the whole article to the browser, then hides part of it with CSS and a
-          JavaScript check. Whatever the browser receives, the reader controls, so deleting the overlay or flipping one
-          flag reveals content the site meant to sell. It is a textbook case of enforcing a server-side rule on the
-          client.
-        </>
-      }
-      line={LINE}
-      sandbox={<PaywallSandbox mode={mode} onModeChange={setMode} />}
-      why={
-        <>
-          Paid content leaks the moment a reader opens DevTools, installs a bypass extension or turns off JavaScript —
-          no hacking skills required. The same mistake guards more than articles: trial limits, admin buttons and
-          premium features hidden only in the interface.
-        </>
-      }
-      incident={{
-        label: "ONGOING",
-        title: "Paywalls that rely on JavaScript",
-        text: "Wikipedia's article on paywalls notes that readers can get past paywalls that depend on JavaScript simply by disabling it, or with third-party tools such as the Bypass Paywalls Clean extension.",
-        href: "https://en.wikipedia.org/wiki/Paywall",
-        linkLabel: "Wikipedia — Paywall",
-      }}
-      fix={FIX}
-      sources={[
-        { label: "OWASP — Authorization Cheat Sheet (checks in the right location)", href: "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html" },
-        { label: "MITRE — CWE-602: Client-Side Enforcement of Server-Side Security", href: "https://cwe.mitre.org/data/definitions/602.html" },
-        { label: "OWASP Top 10 — A04:2021 Insecure Design", href: "https://owasp.org/Top10/A04_2021-Insecure_Design/" },
-        { label: "Wikipedia — Paywall", href: "https://en.wikipedia.org/wiki/Paywall" },
-      ]}
-      onVerifyFix={() => setMode("fixed")}
-    />
+    <main className="mx-auto max-w-4xl px-4 sm:px-6">
+      <header className="animate-rise border-b border-white/10 pb-10 pt-10 sm:pt-14">
+        <a
+          href="#labs"
+          className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] text-white/45 transition-colors duration-300 hover:text-white"
+        >
+          <ArrowLeft size={13} /> LIGHT-BOX
+        </a>
+        <p className="mt-8 font-mono text-xs tracking-[0.25em] text-white/50">PLATE 03</p>
+        <h1 className="font-display mt-3 text-3xl font-bold leading-[1.08] text-white sm:text-5xl">
+          Client-Side Paywall Bypass <span className="text-white/45">(Presentation-Layer Access Control)</span>
+        </h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-white/65">
+          <strong className="font-semibold text-white">Core Lesson:</strong> Never rely on client-side DOM observers, CSS
+          hiding, or client-side data storage to enforce paywalls. Because the browser belongs to the user, presentation
+          layers can always be manipulated.
+        </p>
+      </header>
+
+      {/* ── 1. Vulnerable implementation ─────────────────────────────────── */}
+      <section id="vulnerable-section" className="py-12">
+        <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+          1. Vulnerable Implementation (Client-Side Guard)
+        </h2>
+        <p className="mt-3 leading-7 text-white/65">
+          The secret content is already present in the DOM. A <Code>MutationObserver</Code> watches for tampering and
+          wipes the container if modified.
+        </p>
+
+        <article id="vuln-sandbox" ref={vulnRef} className="glass mt-6 min-h-[150px] rounded-xl p-6" />
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ControlButton onClick={vulnRemoveOverlay}>1. Remove Paywall Overlay</ControlButton>
+          <ControlButton onClick={vulnStopObserver}>2. Run Payload (Stop Observer)</ControlButton>
+          <ControlButton onClick={() => initVulnerableSandbox(vulnRef.current)}>3. Reset Sandbox</ControlButton>
+        </div>
+
+        <h3 className="font-display mt-10 text-lg font-bold text-white">Vulnerable Source Code</h3>
+        <div className="mt-4">
+          <CodeFilm {...VULN_CODE} />
+        </div>
+      </section>
+
+      <hr className="border-white/10" />
+
+      {/* ── 2. Secure implementation ─────────────────────────────────────── */}
+      <section id="secure-section" className="py-12">
+        <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+          2. Secure Implementation (Simulated Server-Side Authorization)
+        </h2>
+        <p className="mt-3 leading-7 text-white/65">
+          The secret content is withheld from the initial DOM render entirely. It is fetched from a server (simulated
+          locally) only <em>after</em> authorization.
+        </p>
+
+        <article id="secure-sandbox" ref={secureRef} className="glass mt-6 min-h-[150px] rounded-xl p-6" />
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ControlButton onClick={secureRemoveOverlay}>Test: Remove Paywall Overlay</ControlButton>
+          <ControlButton onClick={secureRunPayload}>Test: Run Observer Payload</ControlButton>
+          <ControlButton onClick={() => initSecureSandbox(secureRef.current)}>Reset Secure Sandbox</ControlButton>
+        </div>
+
+        <h3 className="font-display mt-10 text-lg font-bold text-white">Secure Source Code</h3>
+        <div className="mt-4">
+          <CodeFilm {...SECURE_CODE} />
+        </div>
+      </section>
+
+      <hr className="mb-16 border-white/10" />
+
+      {/* ── Visible payload input area ───────────────────────────────────── */}
+      <section id="payload-area" className="glass rounded-xl p-6 sm:p-8">
+        <h3 className="font-display text-xl font-bold text-white">Payload Injection Center</h3>
+        <p className="mt-2 leading-7 text-white/65">
+          Copy and paste the known payload into this field to disable the client-side guard on the Vulnerable
+          Implementation.
+        </p>
+        <textarea
+          id="payload-input"
+          rows={6}
+          value={payload}
+          onChange={(e) => setPayload(e.target.value)}
+          spellCheck={false}
+          className="mt-4 w-full rounded-lg border border-white/15 bg-black/50 p-4 font-mono text-[12.5px] leading-6 text-white/85 outline-none transition-colors duration-300 focus:border-white/40"
+        />
+        <button
+          type="button"
+          id="execute-payload-btn"
+          onClick={executePayload}
+          className="mt-4 rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-[#050505] transition-all duration-300 hover:shadow-[0_0_28px_rgba(255,255,255,0.35)]"
+        >
+          Execute Payload on Vulnerable App
+        </button>
+        {payloadError && (
+          <p role="alert" className="mt-3 w-fit rounded-[3px] border border-white/60 px-2 py-1 font-mono text-[11.5px] text-white">
+            {payloadError} — check the console for details.
+          </p>
+        )}
+      </section>
+
+      <footer className="mt-20 border-t border-white/10 py-8 text-center font-mono text-xs text-white/40">
+        DOMino — every exploit here runs as a safe simulation in your own browser tab.
+      </footer>
+    </main>
   );
 }
