@@ -10,7 +10,7 @@ const SECRET_HTML_CONTENT = `
   </div>
 `;
 
-const LINE_BASE = "mt-4 w-fit font-mono text-[11.5px] leading-5 tracking-wide";
+const LINE_BASE = "mt-4 w-fit font-mono text-[13.5px] leading-5 tracking-wide";
 const TONE = {
   neutral: "text-white/55",
   strong: "text-white",
@@ -33,12 +33,12 @@ function initVulnerableSandbox(vulnSandbox) {
 
   vulnSandbox.innerHTML = `
     <div id="vuln-content-box">
-      <p class="text-[15px] text-white/80"><strong class="text-white">Question:</strong> What does the fox say?</p>
+      <p class="text-[17px] text-white/80"><strong class="text-white">Question:</strong> What does the fox say?</p>
       <div id="vuln-answer-wrapper" class="blurred-secret mt-3">
         ${SECRET_HTML_CONTENT}
       </div>
       <div id="vuln-paywall" class="mt-4 rounded-md border-2 border-dashed border-white/40 bg-white/[0.03] p-4">
-        <p class="font-mono text-[11px] tracking-[0.2em] text-white">PAYWALL ACTIVE</p>
+        <p class="font-mono text-[13px] tracking-[0.2em] text-white">PAYWALL ACTIVE</p>
         <p class="mt-1 text-sm text-white/70">Pay $2 to unlock the answer!</p>
       </div>
     </div>
@@ -51,7 +51,7 @@ function initVulnerableSandbox(vulnSandbox) {
     // Disconnect first so the wipe below doesn't re-trigger the observer.
     window.guardObserver.disconnect();
     vulnSandbox.innerHTML = `
-      <p class="tamper-alert inline-block rounded-[3px] bg-white px-2 py-1 font-mono text-[12px] font-semibold tracking-[0.16em] text-[#050505]">⚠︎ TAMPERING DETECTED! ⚠︎</p>
+      <p class="tamper-alert inline-block rounded-[3px] bg-white px-2 py-1 font-mono text-[14px] font-semibold tracking-[0.16em] text-[#050505]">⚠︎ TAMPERING DETECTED! ⚠︎</p>
       <p class="mt-3 text-sm text-white/70">Unauthorized DOM modification blocked. Page content deleted.</p>
     `;
   });
@@ -91,9 +91,9 @@ async function simulateServerFetch(authToken) {
 function initSecureSandbox(secureSandbox) {
   secureSandbox.innerHTML = `
     <div id="secure-box">
-      <p class="text-[15px] text-white/80"><strong class="text-white">Question:</strong> What does the fox say?</p>
+      <p class="text-[17px] text-white/80"><strong class="text-white">Question:</strong> What does the fox say?</p>
       <div id="secure-paywall" class="mt-4 rounded-md border-2 border-white/40 bg-white/[0.03] p-4">
-        <p class="font-mono text-[11px] tracking-[0.2em] text-white">PAYWALL ACTIVE</p>
+        <p class="font-mono text-[13px] tracking-[0.2em] text-white">PAYWALL ACTIVE</p>
         <p class="mt-1 text-sm italic text-white/60">[Content withheld by server]</p>
         <button type="button" id="secure-btn-pay" class="mt-3 rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-[#050505] transition-all duration-300 hover:shadow-[0_0_24px_rgba(255,255,255,0.3)] disabled:cursor-wait disabled:opacity-60">Simulate Valid $2 Payment (Get Token)</button>
       </div>
@@ -199,7 +199,7 @@ function ControlButton({ onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md border border-white/15 bg-white/[0.03] px-4 py-2 font-mono text-[12px] tracking-wide text-white/80 transition-all duration-300 hover:border-white/40 hover:text-white"
+      className="rounded-md border border-white/15 bg-white/[0.03] px-4 py-2 font-mono text-[14px] tracking-wide text-white/80 transition-all duration-300 hover:border-white/40 hover:text-white"
     >
       {children}
     </button>
@@ -242,11 +242,11 @@ export default function Lab03PaywallBypass() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl px-4 sm:px-6">
+    <main className="text-up mx-auto max-w-4xl px-4 sm:px-6">
       <header className="animate-rise border-b border-white/10 pb-10 pt-10 sm:pt-14">
         <a
           href="#labs"
-          className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] text-white/45 transition-colors duration-300 hover:text-white"
+          className="inline-flex items-center gap-2 font-mono text-[13px] tracking-[0.2em] text-white/45 transition-colors duration-300 hover:text-white"
         >
           <ArrowLeft size={13} /> LIGHT-BOX
         </a>
@@ -281,7 +281,7 @@ export default function Lab03PaywallBypass() {
 
         <h3 className="font-display mt-10 text-lg font-bold text-white">Vulnerable Source Code</h3>
         <div className="mt-4">
-          <CodeFilm {...VULN_CODE} />
+          <CodeFilm {...VULN_CODE} large />
         </div>
       </section>
 
@@ -307,7 +307,7 @@ export default function Lab03PaywallBypass() {
 
         <h3 className="font-display mt-10 text-lg font-bold text-white">Secure Source Code</h3>
         <div className="mt-4">
-          <CodeFilm {...SECURE_CODE} />
+          <CodeFilm {...SECURE_CODE} large />
         </div>
       </section>
 
@@ -326,7 +326,7 @@ export default function Lab03PaywallBypass() {
           value={payload}
           onChange={(e) => setPayload(e.target.value)}
           spellCheck={false}
-          className="mt-4 w-full rounded-lg border border-white/15 bg-black/50 p-4 font-mono text-[12.5px] leading-6 text-white/85 outline-none transition-colors duration-300 focus:border-white/40"
+          className="mt-4 w-full rounded-lg border border-white/15 bg-black/50 p-4 font-mono text-[14.5px] leading-6 text-white/85 outline-none transition-colors duration-300 focus:border-white/40"
         />
         <button
           type="button"
@@ -337,7 +337,7 @@ export default function Lab03PaywallBypass() {
           Execute Payload on Vulnerable App
         </button>
         {payloadError && (
-          <p role="alert" className="mt-3 w-fit rounded-[3px] border border-white/60 px-2 py-1 font-mono text-[11.5px] text-white">
+          <p role="alert" className="mt-3 w-fit rounded-[3px] border border-white/60 px-2 py-1 font-mono text-[13.5px] text-white">
             {payloadError} — check the console for details.
           </p>
         )}

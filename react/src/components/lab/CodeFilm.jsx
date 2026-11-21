@@ -47,7 +47,14 @@ const MARK_CHIP = {
   patch: "border border-white/60 text-white",
 };
 
-export default function CodeFilm({ file, lines }) {
+// `large` sets every size 2px up (Labs 01 and 03 read larger).
+const SIZE = {
+  normal: { file: "text-[11px]", chip: "text-[9.5px]", code: "text-[12.5px] sm:text-[13px]", noteChip: "text-[9px]", note: "text-[12.5px]" },
+  large: { file: "text-[13px]", chip: "text-[11.5px]", code: "text-[14.5px] sm:text-[15px]", noteChip: "text-[11px]", note: "text-[14.5px]" },
+};
+
+export default function CodeFilm({ file, lines, large = false }) {
+  const size = SIZE[large ? "large" : "normal"];
   const markAt = lines.findIndex((l) => l.mark);
   const mark = markAt >= 0 ? lines[markAt].mark : null;
 
@@ -60,16 +67,16 @@ export default function CodeFilm({ file, lines }) {
               <span key={i} className="h-2.5 w-2.5 rounded-full bg-white/15" />
             ))}
           </span>
-          <span className="truncate font-mono text-[11px] text-white/55">{file}</span>
+          <span className={`truncate font-mono text-white/55 ${size.file}`}>{file}</span>
         </span>
         {mark && (
-          <span className={`shrink-0 rounded-[3px] px-1.5 py-0.5 font-mono text-[9.5px] tracking-[0.16em] ${MARK_CHIP[mark]}`}>
+          <span className={`shrink-0 rounded-[3px] px-1.5 py-0.5 font-mono tracking-[0.16em] ${size.chip} ${MARK_CHIP[mark]}`}>
             {MARK_LABEL[mark]} · L{markAt + 1}
           </span>
         )}
       </figcaption>
 
-      <pre className="overflow-x-auto py-3 font-mono text-[12.5px] leading-6 sm:text-[13px]">
+      <pre className={`overflow-x-auto py-3 font-mono leading-6 ${size.code}`}>
         {lines.map((line, i) => (
           <div key={i} className={line.mark ?? undefined}>
             <div className="flex">
@@ -86,10 +93,10 @@ export default function CodeFilm({ file, lines }) {
             </div>
             {line.note && (
               <div className="flex items-start gap-2.5 whitespace-normal pb-2.5 pl-11 pr-6 pt-1">
-                <span className={`mt-0.5 shrink-0 rounded-[3px] px-1.5 py-0.5 font-mono text-[9px] tracking-[0.16em] ${MARK_CHIP[line.mark]}`}>
+                <span className={`mt-0.5 shrink-0 rounded-[3px] px-1.5 py-0.5 font-mono tracking-[0.16em] ${size.noteChip} ${MARK_CHIP[line.mark]}`}>
                   ▲ {MARK_LABEL[line.mark]}
                 </span>
-                <span className="font-sans text-[12.5px] leading-5 text-white/75">{line.note}</span>
+                <span className={`font-sans leading-5 text-white/75 ${size.note}`}>{line.note}</span>
               </div>
             )}
           </div>

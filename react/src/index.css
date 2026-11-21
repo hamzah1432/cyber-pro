@@ -90,6 +90,21 @@ body {
   80%, 100% { transform: translateY(-100vh); }
 }
 
+/* ── Larger lab text (Labs 01 and 03): +2px on every size ────────────────────
+   Tailwind's named sizes resolve through these variables, and text without a
+   size class inherits the root size set here. */
+.text-up {
+  font-size: calc(1rem + 2px);
+  --text-xs: calc(0.75rem + 2px);
+  --text-sm: calc(0.875rem + 2px);
+  --text-base: calc(1rem + 2px);
+  --text-lg: calc(1.125rem + 2px);
+  --text-xl: calc(1.25rem + 2px);
+  --text-2xl: calc(1.5rem + 2px);
+  --text-3xl: calc(1.875rem + 2px);
+  --text-5xl: calc(3rem + 2px);
+}
+
 /* ── Frosted smoked-glass surfaces ───────────────────────────────────────── */
 .glass {
   background: rgb(255 255 255 / 0.035);
