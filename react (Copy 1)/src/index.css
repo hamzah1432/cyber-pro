@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #070b14;
+  color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: rgb(16 185 129 / 0.28);
+}
+
+/* ── X-ray film background: faint technical grid + cool radial glows ──────── */
+.bg-xray {
+  background-color: #070b14;
+  background-image:
+    radial-gradient(900px 500px at 78% -5%, rgb(16 185 129 / 0.1), transparent 60%),
+    radial-gradient(760px 520px at 10% 8%, rgb(56 189 248 / 0.08), transparent 55%),
+    radial-gradient(700px 700px at 50% 120%, rgb(14 165 233 / 0.06), transparent 60%),
+    linear-gradient(rgb(148 163 184 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(148 163 184 / 0.045) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 46px 46px, 46px 46px;
+  -webkit-mask-image: radial-gradient(130% 120% at 50% 0%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(130% 120% at 50% 0%, #000 55%, transparent 100%);
+}
+
+/* ── X-ray scanner internals ─────────────────────────────────────────────── */
+.film {
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgb(8 47 55 / 0.55), transparent 70%),
+    linear-gradient(180deg, #04131a 0%, #061820 50%, #041017 100%);
+}
+.film-scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgb(0 0 0 / 0.26) 0px,
+    rgb(0 0 0 / 0.26) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+.film-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgb(45 212 191 / 0.14) 48%,
+    rgb(45 212 191 / 0.22) 50%,
+    transparent 52%,
+    transparent 100%
+  );
+  background-size: 100% 220px;
+  animation: xray-sweep 3.6s linear infinite;
+}
+@keyframes xray-sweep {
+  from { background-position: 0 -220px; }
+  to { background-position: 0 100%; }
+}
+
+/* Pulsing fracture marker on the vulnerable element */
+@keyframes blip {
+  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5); }
+  50% { transform: scale(1.12); opacity: 0.85; box-shadow: 0 0 0 10px rgb(239 68 68 / 0); }
+}
+.animate-blip { animation: blip 1.6s ease-in-out infinite; }
+
+/* Hover lift for cards */
+.lift {
+  transition: transform 0.3s ease-out, border-color 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+.lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Soft entrance for sections */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.6s ease-out both; }
+
+/* Reused by the (kept-on-disk) lab components */
+@keyframes breach-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0); }
+  50% { box-shadow: 0 0 28px -2px rgb(239 68 68 / 0.35); }
+}
+.animate-breach { animation: breach-pulse 1.4s ease-in-out 2; }
+@keyframes log-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-log-in { animation: log-in 0.3s ease-out both; }
+.console-scroll { scrollbar-width: thin; scrollbar-color: #1e293b transparent; }
+.console-scroll::-webkit-scrollbar { width: 8px; }
+.console-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .film-sweep::after,
+  .animate-blip,
+  .animate-breach,
+  .animate-rise { animation: none; }
+}
